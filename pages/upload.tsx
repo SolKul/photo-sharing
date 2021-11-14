@@ -1,16 +1,30 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import {getAuth} from 'firebase/auth'
 
 import Layout from '../components/Layout'
 import firebaseApp from "../components/fire"
+import { useRouter } from 'next/dist/client/router';
 
 const storage = getStorage(firebaseApp)
+const auth = getAuth(firebaseApp);
 
 const Index = () => {
+  const [message,setMessage]=useState("wait ...")
+  const router = useRouter()
+
+  useEffect(()=>{
+    if (auth.currentUser == null){
+      router.push('/')
+    }else{
+      setMessage('logined ' + auth.currentUser.displayName)
+    }
+  },[])
 
   return (
     <div>
       <Layout header='Photo Sharing' title='Upload page'>
+        <p>{message}</p>
         <Upload />
       </Layout>
     </div>

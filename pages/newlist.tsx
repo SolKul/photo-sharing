@@ -1,13 +1,16 @@
 import firebaseApp from "../components/fire"
 import { getFirestore,collection, getDocs } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
+import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
 
 import Layout from '../components/Layout'
 import { ImageList,ImageInfo } from "../components/ImageList";
+import { useRouter } from "next/dist/client/router";
 
 const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp)
+const auth = getAuth(firebaseApp);
 
 type FileInfo={
   filePath:string
@@ -15,9 +18,12 @@ type FileInfo={
 }
 
 export default function Home(){
+  const [message,setMessage]=useState<string>("")
   const [imList, setImlist] = useState<ImageInfo[]>([])
+  const router=useRouter()
 
-  useEffect(()=>{
+  const storeUrl=()=>{
+
     // 順番通りに画像情報を格納するための配列
     const fileInfoList:FileInfo[]=[]
     // imlistにsetする前の画像情報を格納するための仮の配列
@@ -38,7 +44,7 @@ export default function Home(){
           }
         )
       })
-      
+
       // 配列のmapではインデックス番号が取得できるので、
       // 処理の順番が違っても順番通りにtmpImListに格納できる
       // そしてそれらのPromiseをtasksに格納
@@ -58,12 +64,23 @@ export default function Home(){
         setImlist(tmpImList)
       })
     })
+
+  }
+
+  useEffect(()=>{
+    if (auth.currentUser == null){
+      router.push('/')
+    }else{
+      setMessage('logined ' + auth.currentUser.displayName)
+      setTimeout(storeUrl,100)
+    }
   },[])
 
   return (
     <div>
       <Layout header='Photo Sharing' title='New Photo List page'>
-        こんにち！
+        <p>{message}</p>
+        こんにちは
         <ImageList imlist={imList}/>
       </Layout>
     </div>
