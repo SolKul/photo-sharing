@@ -1,0 +1,22 @@
+.square{
+  &>div {
+    position: relative;
+    list-style-type: none;
+
+    &::before {
+      content: "";
+      display: block;
+      padding-top: 100%;
+      width: 100%;
+    }
+
+    &>div{
+      border: solid #000 2px;
+      position: absolute; // 浮かせる
+      width: 100%; // 親要素の90%
+      height: 100%; // 親要素の90%
+      top: 0%;
+      left: 0%;
+    }
+  }
+}
