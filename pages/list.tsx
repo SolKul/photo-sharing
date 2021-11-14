@@ -56,6 +56,7 @@ const Index = () => {
         const tasks: Array<any> = [];
         let count = 0;
         res.items.forEach((itemRef: any) => {
+          console.log(itemRef)
           // もし画像ファイルだったら、
           if (checkExt(itemRef.name)) {
             // 画像URLを取得、保存するPromiseを生成し、
