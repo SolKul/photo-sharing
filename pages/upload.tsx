@@ -57,7 +57,7 @@ const Upload = () => {
     if (imageAsFile === '' || imageAsFile === undefined) {
       console.error(`not an image, the image file is a ${typeof (imageAsFile)}`)
     } else {
-      const storageRef=ref(storage,`/images/${imageAsFile.name}`)
+      const storageRef=ref(storage,`/photos/${imageAsFile.name}`)
       const uploadTask = uploadBytesResumable(storageRef,imageAsFile)
       //initiates the firebase side uploading 
       //https://firebase.google.com/docs/storage/web/upload-files?hl=ja#monitor_upload_progress
