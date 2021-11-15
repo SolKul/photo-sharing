@@ -1,13 +1,12 @@
 import styles from '../styles/Home.module.scss'
 import Link from 'next/link'
-import { GoogleAuthProvider,getAuth,signInWithPopup } from "firebase/auth";
+import { signInAnonymously,getAuth } from "firebase/auth";
 import firebaseApp from "../components/fire"
 
 import Layout from '../components/Layout'
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/dist/client/router';
 
-const provider = new GoogleAuthProvider();
 const auth = getAuth(firebaseApp);
 
 export default function Home(){
@@ -16,7 +15,7 @@ export default function Home(){
 
   useEffect(()=>{
     if (auth.currentUser == null){
-      signInWithPopup(auth, provider)
+      signInAnonymously(auth)
         .then((result)=>{
           setMessage('logined ' + result.user.displayName)
         },(error)=>{
@@ -26,14 +25,6 @@ export default function Home(){
       setMessage('logined ' + auth.currentUser.displayName)
     }
   },[])
-
-  const item_list=[]
-  for (let i=0;i<5;i++){
-    item_list.push(
-    <div className="col-4 col-lg-3">
-      <div>col-4</div>
-    </div>)
-  }
 
   return (
     <div>
@@ -48,9 +39,6 @@ export default function Home(){
         <Link href="/newlist">
           <a>List Page</a>
         </Link>
-        </div>
-        <div className={`row g-0 ${styles.square}`}>
-          {item_list}
         </div>
       </Layout>
     </div>

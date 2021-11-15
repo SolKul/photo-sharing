@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { useState,useEffect } from 'react';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
@@ -95,7 +96,21 @@ const Upload = () => {
       />
       <button className="btn btn-primary">アップロード</button>
     </form>
-    <img src={imageAsUrl.imgUrl} alt="image tag" />
+    <style jsx>{`
+      .square{
+        position:relative;
+        height:100px;
+      }
+
+      .square{
+        border:solid #AAA 2px;
+      }
+    `}</style>
+    <div className="row justify-content-md-center">
+      <div className="square col-4">
+        {imageAsUrl.imgUrl && <Image src={imageAsUrl.imgUrl} objectFit="contain" layout="fill"  alt="image tag" />}
+      </div>
+    </div>
   </div>
 };
 
