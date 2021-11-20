@@ -29,6 +29,7 @@ export default function Home(){
   return (
     <div>
       <Layout header='Photo Sharing' title='Top page.'>
+      <div className="container mt-2">
         <p>{message}</p>
         <div>
           <Link href="/upload">
@@ -41,10 +42,16 @@ export default function Home(){
           </Link>
         </div>
         <div>
+          <Link href="/login">
+            <a>Login Page</a>
+          </Link>
+        </div>
+        <div>
           <Link href="/token">
             <a>Token Page</a>
           </Link>
         </div>
+      </div>
       </Layout>
     </div>
   )

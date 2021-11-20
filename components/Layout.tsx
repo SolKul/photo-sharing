@@ -9,9 +9,7 @@ export default function Layout({children,title,header}:any){
         <title>{title}</title>
       </Head>
       <Header header={header} />
-      <div className="container">
         {children}
-      </div>
       <Footer footer="This is footer" />
     </div>
   )
