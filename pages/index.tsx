@@ -31,14 +31,19 @@ export default function Home(){
       <Layout header='Photo Sharing' title='Top page.'>
         <p>{message}</p>
         <div>
-        <Link href="/upload">
-          <a>Upload Page</a>
-        </Link>
+          <Link href="/upload">
+            <a>Upload Page</a>
+          </Link>
         </div>
         <div>
-        <Link href="/newlist">
-          <a>List Page</a>
-        </Link>
+          <Link href="/newlist">
+            <a>List Page</a>
+          </Link>
+        </div>
+        <div>
+          <Link href="/token">
+            <a>Token Page</a>
+          </Link>
         </div>
       </Layout>
     </div>
