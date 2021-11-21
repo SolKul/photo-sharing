@@ -61,7 +61,7 @@ export default function Home(){
 
   useEffect(()=>{
     if (auth.currentUser == null){
-      router.push('/')
+      router.push('/login')
     }else{
       auth.currentUser.getIdTokenResult(true)
       .then((result)=>{

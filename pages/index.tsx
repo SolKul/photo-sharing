@@ -15,7 +15,7 @@ export default function Home(){
   useEffect(()=>{
     if (auth.currentUser == null){
       console.log("not logined")
-      router.push('/')
+      router.push('/login')
     }
   },[])
 
@@ -49,7 +49,7 @@ export default function Home(){
           </Link>
         </div>
         <div>
-          <Link href="/">
+          <Link href="/login">
             <a onClick={doLogout}>Logout</a>
           </Link>
         </div>
