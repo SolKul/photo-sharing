@@ -11,6 +11,7 @@ const auth = getAuth(firebaseApp);
 const functions = getFunctions(firebaseApp,"asia-northeast1");
 // connectFunctionsEmulator(functions, "localhost", 5001);
 
+// cloud functionでコードを認証し、custom claimを付与してもらう処理
 const requireVerification=async(user: Auth["currentUser"],code:string)=>{
   if(user){
     const verifyCode = httpsCallable(functions, "authWithCode");
@@ -26,22 +27,25 @@ const requireVerification=async(user: Auth["currentUser"],code:string)=>{
       console.log(error)
       throw "failed ..."
     }
+  }else{
+    throw "failed ..."
   }
 }
 
 export default function Home(){
   const [code,setCode] = useState<string>("")
-  const [message,setMessage] = useState<string>("wait ...")
-  const [authMsg,setAuthMsg]=useState<string>("wait ...")
+  const router = useRouter()
 
+  // アクセス時に匿名認証
   useEffect(()=>{
     if (auth.currentUser == null){
       signInAnonymously(auth)
     }else{
-      setMessage('logined ' + auth.currentUser.uid)
+      console.log('logined ' + auth.currentUser.uid)
     } 
   },[])
 
+  // コードを入力したらその値をcodeに保持
   const doChangeCode=(e:any)=>{
     const inputCode=e.target.value
     if (inputCode.length<5){
@@ -49,24 +53,29 @@ export default function Home(){
     }
   }
 
+  // コードをfunctionに送り、認証
   const doLogin=()=>{
-    requireVerification(auth.currentUser,code)
-    .then(
-      (result)=>{
-        result && setAuthMsg(result)
-      },
-      (error)=>{
-        error && setAuthMsg(error)
-      }
-    )
+    if (auth.currentUser){
+      requireVerification(auth.currentUser,code)
+      .then(
+        (result)=>{
+          console.log(result)
+          router.push("/")
+        },
+        (error)=>{
+          console.log(error)
+          router.push("/")
+        }
+      )
+    }else{
+      router.push("/")
+    }
   }
 
   return <div>
     <Layout header='Photo Sharing' title='Login Page'>
     <div className="container mt-5 text-center">
       <div className="row justify-content-center g-1 form-group">
-        <p className="col-11 text-start">{message}</p>
-        <p className="col-11 text-start">{authMsg}</p>
         <label className="h5 form-label" htmlFor="code">認証コードを入力してください</label>
         <div></div>
         {/* <div className="form-text text-start col-11">認証コードは4桁です</div>
