@@ -39,9 +39,11 @@ export default function Home(){
   // アクセス時に匿名認証
   useEffect(()=>{
     if (auth.currentUser == null){
-      signInAnonymously(auth)
+      signInAnonymously(auth).then(()=>{
+        console.log("logined: ",auth.currentUser && auth.currentUser.uid)
+      })
     }else{
-      console.log('logined ' + auth.currentUser.uid)
+      console.log('logined: ',auth.currentUser.uid)
     } 
   },[])
 
@@ -60,7 +62,7 @@ export default function Home(){
       .then(
         (result)=>{
           console.log(result)
-          router.push("/")
+          router.push("/toc")
         },
         (error)=>{
           console.log(error)
