@@ -32,30 +32,35 @@ export default function Home(){
 
     // 順番通りに画像情報を格納するための配列
     const tmpImTable:JSX.Element[]=[]
-    // collectionへの参照を取得
-    const colRef = collection(db, "photos");
-    // collection内のdocumentの配列を取得
-    getDocs(colRef)
-    .then(
-      (snapshot)=>{
-        // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
-        snapshot.forEach((document)=>{
-          const doc=document.data()
-          tmpImTable.push(
-            <tr key={document.id}>
-              <td>{document.id}</td>
-              <td>{doc.filePath}</td>
-              <td>{ convertDateSlash(doc.timeCreated.toDate()) }</td>
-            </tr>
-          )
-        })
-        setMessage("Success access data")
-        setImTable(tmpImTable)
-      },
-      (error)=>{
-        setMessage("Failed access data")
-        console.log(error)
-    })
+    try{
+      // collectionへの参照を取得
+      const colRef = collection(db, "photos");
+      // collection内のdocumentの配列を取得
+      getDocs(colRef)
+      .then(
+        (snapshot)=>{
+          // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
+          snapshot.forEach((document)=>{
+            const doc=document.data()
+            tmpImTable.push(
+              <tr key={document.id}>
+                <td>{document.id}</td>
+                <td>{doc.filePath}</td>
+                <td>{ convertDateSlash(doc.timeCreated.toDate()) }</td>
+              </tr>
+            )
+          })
+          setMessage("Success access data")
+          setImTable(tmpImTable)
+        },
+        (error)=>{
+          setMessage("Failed access data")
+          console.log(error)
+      })
+    }catch(error){
+      setMessage("Failed access data")
+      console.log(error)
+    }
 
   }
 
@@ -63,11 +68,7 @@ export default function Home(){
     if (auth.currentUser == null){
       router.push('/login')
     }else{
-      auth.currentUser.getIdTokenResult(true)
-      .then((result)=>{
-        console.log(result)
-        setTimeout(makeImTable,100)
-      })
+      makeImTable()
     } 
   },[])
 
