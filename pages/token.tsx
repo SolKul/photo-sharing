@@ -1,16 +1,14 @@
+import { useState,useEffect } from "react";
+import { useRouter } from "next/router";
+
 import firebaseApp from "../components/fire"
 import { getFirestore,collection, getDocs } from "firebase/firestore";
-import { getAuth,Auth} from 'firebase/auth'
-import { useState,useEffect } from "react";
-import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth} from 'firebase/auth'
 
 import Layout from '../components/Layout'
-import { useRouter } from "next/dist/client/router";
 
 const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
-const functions = getFunctions(firebaseApp,"asia-northeast1");
-// connectFunctionsEmulator(functions, "localhost", 5001);
 
 // Dateオブジェクトをスラッシュ区切りの日付表示に
 const convertDateSlash=(date:Date)=>{
@@ -25,26 +23,8 @@ const convertDateSlash=(date:Date)=>{
 // ゼロ埋め
 const zeroPadding=(num:number,length:number)=> ('0000000000' + num).slice(-length);
 
-const requireVerification=async(user: Auth["currentUser"])=>{
-  if(user){
-    const verifyCode = httpsCallable(functions, "authWithCode");
-    try {
-      await verifyCode({verifyCode:"1222"})
-      const idTokenResult = await user.getIdTokenResult(true)
-      if (idTokenResult.claims.codeVerified){
-        return "code verified!"
-      }else{
-        throw "failed ..."
-      }
-    }catch(error){
-      console.log(error)
-      throw "failed ..."
-    }
-  }
-}
-
 export default function Home(){
-  const [message,setMessage]=useState<string>("")
+  const [message,setMessage]=useState<string>("wait ...")
   const [imTable, setImTable] = useState<JSX.Element[]>([])
   const router=useRouter()
 
@@ -83,14 +63,11 @@ export default function Home(){
     if (auth.currentUser == null){
       router.push('/')
     }else{
-      requireVerification(auth.currentUser).then(
-        (result)=>{
-          setTimeout(makeImTable,100)
-        },
-        (error)=>{
-          setMessage("Failed Authenticated")
-          console.log(error)
-        })
+      auth.currentUser.getIdTokenResult(true)
+      .then((result)=>{
+        console.log(result)
+        setTimeout(makeImTable,100)
+      })
     } 
   },[])
 
