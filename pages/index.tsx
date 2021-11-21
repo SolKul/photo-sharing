@@ -1,45 +1,59 @@
-import styles from '../styles/Home.module.scss'
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link'
-import { signInAnonymously,getAuth } from "firebase/auth";
+
 import firebaseApp from "../components/fire"
+import { getAuth } from "firebase/auth";
 
 import Layout from '../components/Layout'
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/dist/client/router';
 
 const auth = getAuth(firebaseApp);
 
 export default function Home(){
   const router = useRouter()
-  const [message,setMessage] = useState<string>("wait ...")
 
   useEffect(()=>{
     if (auth.currentUser == null){
-      signInAnonymously(auth)
-        .then((result)=>{
-          setMessage('logined ' + result.user.displayName)
-        },(error)=>{
-          router.push('/')
-        })
-    }else{
-      setMessage('logined ' + auth.currentUser.displayName)
+      console.log("not logined")
+      router.push('/login')
     }
   },[])
+
+  const doLogout = ()=>{
+    console.log("logout: ",auth.currentUser && auth.currentUser.uid)
+    auth.signOut()
+  }
 
   return (
     <div>
       <Layout header='Photo Sharing' title='Top page.'>
-        <p>{message}</p>
+      <div className="container mt-2">
         <div>
-        <Link href="/upload">
-          <a>Upload Page</a>
-        </Link>
+          <Link href="/upload">
+            <a>Upload Page</a>
+          </Link>
         </div>
         <div>
-        <Link href="/newlist">
-          <a>List Page</a>
-        </Link>
+          <Link href="/newlist">
+            <a>List Page</a>
+          </Link>
         </div>
+        <div>
+          <Link href="/login">
+            <a>Login Page</a>
+          </Link>
+        </div>
+        <div>
+          <Link href="/token">
+            <a>Token Page</a>
+          </Link>
+        </div>
+        <div>
+          <Link href="/login">
+            <a onClick={doLogout}>Logout</a>
+          </Link>
+        </div>
+      </div>
       </Layout>
     </div>
   )
