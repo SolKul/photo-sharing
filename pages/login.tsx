@@ -11,7 +11,8 @@ const auth = getAuth(firebaseApp);
 const functions = getFunctions(firebaseApp,"asia-northeast1");
 // connectFunctionsEmulator(functions, "localhost", 5001);
 
-// cloud functionでコードを認証し、custom claimを付与してもらう処理
+/** cloud functionでコードを認証し、custom claimを付与してもらう処理
+ */
 const requireVerification=async(user: Auth["currentUser"],code:string)=>{
   if(user){
     const verifyCode = httpsCallable(functions, "authWithCode");
@@ -48,7 +49,8 @@ export default function Home(){
     } 
   },[])
 
-  // コードを入力したらその値をcodeに保持
+  /**コードを入力したらその値をcodeに保持する処理
+   */
   const doChangeCode=(e:any)=>{
     const inputCode=e.target.value
     if (inputCode.length<5){
@@ -56,7 +58,8 @@ export default function Home(){
     }
   }
 
-  // コードをfunctionに送り、認証
+  /** コードをfunctionに送り、認証する処理
+   */
   const doLogin=(e:React.MouseEvent<HTMLElement, MouseEvent>)=>{
     e.preventDefault()
     const user =auth.currentUser
@@ -67,13 +70,17 @@ export default function Home(){
         (result)=>{
           console.log(result)
           setMessage("認証しました")
-          user.getIdToken(true)
-          router.push("/")
+          user.getIdToken(true).then(()=>{
+            router.push("/")
+          })
         },
         (error)=>{
           console.log(error.message)
           if (error instanceof TypeError) {
             setMessage("認証コードが間違っています")
+            user.getIdToken(true).then(()=>{
+              router.push("/login")
+            })
           }else{
             router.push("/login")
           }
