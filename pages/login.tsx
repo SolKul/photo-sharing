@@ -21,19 +21,20 @@ const requireVerification=async(user: Auth["currentUser"],code:string)=>{
       if (idTokenResult.claims.codeVerified){
         return "code verified!"
       }else{
-        throw "failed ..."
+        throw new Error("can't be authenticated")
       }
     }catch(error){
       console.log(error)
-      throw "failed ..."
+      throw new TypeError("code doesn't match ...")
     }
   }else{
-    throw "failed ..."
+    throw new Error("user is undefined")
   }
 }
 
 export default function Home(){
   const [code,setCode] = useState<string>("")
+  const [message,setMessage] = useState<string>("")
   const router = useRouter()
 
   // アクセス時に匿名認証
@@ -43,7 +44,7 @@ export default function Home(){
         console.log("logined: ",auth.currentUser && auth.currentUser.uid)
       })
     }else{
-      console.log('logined: ',auth.currentUser.uid)
+      console.log('already logined: ',auth.currentUser.uid)
     } 
   },[])
 
@@ -56,28 +57,37 @@ export default function Home(){
   }
 
   // コードをfunctionに送り、認証
-  const doLogin=()=>{
-    if (auth.currentUser){
-      requireVerification(auth.currentUser,code)
+  const doLogin=(e:React.MouseEvent<HTMLElement, MouseEvent>)=>{
+    e.preventDefault()
+    const user =auth.currentUser
+    if (user){
+      setMessage("認証中...")
+      requireVerification(user,code)
       .then(
         (result)=>{
           console.log(result)
-          router.push("/toc")
+          setMessage("認証しました")
+          user.getIdToken(true)
+          router.push("/")
         },
         (error)=>{
-          console.log(error)
-          router.push("/")
+          console.log(error.message)
+          if (error instanceof TypeError) {
+            setMessage("認証コードが間違っています")
+          }else{
+            router.push("/login")
+          }
         }
       )
     }else{
-      router.push("/")
+      router.push("/login")
     }
   }
 
   return <div>
-    <Layout header='Photo Sharing' title='Login Page'>
+    <Layout header='Photo Sharing' title='Login Page' href="/login">
     <div className="container mt-5 text-center">
-      <div className="row justify-content-center g-1 form-group">
+      <form className="row justify-content-center g-1 form-group">
         <label className="h5 form-label" htmlFor="code">認証コードを入力してください</label>
         <div></div>
         {/* <div className="form-text text-start col-11">認証コードは4桁です</div>
@@ -86,8 +96,10 @@ export default function Home(){
           <input className="form-control form-control-lg" type="number" id="code" onChange={doChangeCode} value={code} ></input>
         </div>
         <div></div>
-        <button className="col-11 col-md-6 btn btn-primary" onClick={doLogin}>ログイン</button>
-      </div>
+        <input type="submit" className="col-11 col-md-6 btn btn-primary" onClick={doLogin} value="ログイン" />
+        <div></div>
+        <div className="text-start col-11 col-md-6 ">{message}</div>
+      </form>
     </div>
     </Layout>
   </div>
