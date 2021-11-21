@@ -30,15 +30,15 @@ const requireVerification=async(user: Auth["currentUser"])=>{
 export default function Home(){
   return <div>
     <Layout header='Photo Sharing' title='Login Page'>
-    <div className="container mt-5 mx-2 text-center">
+    <div className="container mt-5 text-center">
       <div className="row justify-content-center g-1 form-group">
         <label className="h5 form-label" htmlFor="code">コードを入力してください</label>
         <div></div>
-        <div className="col-12 col-md-8">
-          <input className="col-12 col-md-8 form-control" type="number" id="code"></input>
+        <div className="col-11 col-md-6">
+          <input className="form-control" type="number" id="code"></input>
         </div>
         <div></div>
-        <button className="col-12 col-md-8 btn btn-primary">ログイン</button>
+        <button className="col-11 col-md-6 btn btn-primary">ログイン</button>
       </div>
     </div>
     </Layout>
