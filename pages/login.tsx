@@ -36,6 +36,7 @@ const requireVerification=async(user: Auth["currentUser"],code:string)=>{
 export default function Home(){
   const [code,setCode] = useState<string>("")
   const [message,setMessage] = useState<string>("")
+  const [isVerifying,setIsVerifying]=useState<boolean>(false)
   const router = useRouter()
 
   // アクセス時に匿名認証
@@ -62,9 +63,10 @@ export default function Home(){
    */
   const doLogin=(e:React.MouseEvent<HTMLElement, MouseEvent>)=>{
     e.preventDefault()
+    setIsVerifying(true)
     const user =auth.currentUser
     if (user){
-      setMessage("認証中...")
+      setMessage("コードを確認しています...")
       requireVerification(user,code)
       .then(
         (result)=>{
@@ -79,14 +81,17 @@ export default function Home(){
           if (error instanceof TypeError) {
             setMessage("認証コードが間違っています")
             user.getIdToken(true).then(()=>{
+              setIsVerifying(false)
               router.push("/login")
             })
           }else{
+            setIsVerifying(false)
             router.push("/login")
           }
         }
       )
     }else{
+      setIsVerifying(false)
       router.push("/login")
     }
   }
@@ -94,7 +99,8 @@ export default function Home(){
   return <div>
     <Layout header='Photo Sharing' title='Login Page' href="/login">
     <div className="container mt-5 text-center">
-      <form className="row justify-content-center g-1 form-group">
+      <form className="form-group">
+      <fieldset className="row justify-content-center g-1" disabled={isVerifying}>
         <label className="h5 form-label" htmlFor="code">認証コードを入力してください</label>
         <div></div>
         {/* <div className="form-text text-start col-11">認証コードは4桁です</div>
@@ -106,6 +112,7 @@ export default function Home(){
         <input type="submit" className="col-11 col-md-6 btn btn-primary" onClick={doLogin} value="ログイン" />
         <div></div>
         <div className="text-start col-11 col-md-6 ">{message}</div>
+      </fieldset>
       </form>
     </div>
     </Layout>
