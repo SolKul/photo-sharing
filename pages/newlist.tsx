@@ -1,5 +1,5 @@
 import firebaseApp from "../components/fire"
-import { getFirestore,collection, getDocs,QuerySnapshot } from "firebase/firestore";
+import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
@@ -31,12 +31,14 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
   // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
   snapshot.forEach((document)=>{
     const doc=document.data()
-    fileInfoList.push(
-      {
-        filePath:doc.filePath,
-        id:document.id
-      }
-    )
+    if (doc.thumbFilePath){
+      fileInfoList.push(
+        {
+          filePath:doc.thumbFilePath,
+          id:document.id
+        }
+      )
+    }
   })
 
   // 配列のmapではインデックス番号が取得できるので、
@@ -65,9 +67,10 @@ export default function Home(){
     // collection()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
-      const colRef = collection(db, "photos");
-      // collection内のdocumentの配列を取得
-      getDocs(colRef)
+      const photoRef = collection(db, "photos");
+      // 写真をアップロード日降順で取得(最新のが1番上に)
+      const photoQuery = query(photoRef, orderBy("timeCreated","desc"));
+      getDocs(photoQuery)
       .then(
         (snapshot)=>{
           setMessage("Success access data")
