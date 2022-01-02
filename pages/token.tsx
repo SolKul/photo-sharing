@@ -6,6 +6,7 @@ import { getFirestore,collection, getDocs } from "firebase/firestore";
 import { getAuth} from 'firebase/auth'
 
 import Layout from '../components/Layout'
+import styles from '../styles/Home.module.scss'
 
 const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
@@ -26,6 +27,7 @@ const zeroPadding=(num:number,length:number)=> ('0000000000' + num).slice(-lengt
 export default function Home(){
   const [message,setMessage]=useState<string>("wait ...")
   const [imTable, setImTable] = useState<JSX.Element[]>([])
+  const [show, setShow] = useState<boolean>(false)
   const router=useRouter()
 
   const makeImTable=()=>{
@@ -64,6 +66,11 @@ export default function Home(){
 
   }
 
+  const focusModal=(e:any)=>{
+    e.preventDefault()
+
+  }
+
   useEffect(()=>{
     if (auth.currentUser == null){
       router.push('/login')
@@ -88,9 +95,29 @@ export default function Home(){
             {imTable}
           </tbody>
         </table>
+        <button onClick={() => setShow(true)}>Click</button>
+        <Modal show={show} setShow={setShow}/>
+
 
       </Layout>
     </div>
   )
 }
 
+
+const Modal=({show,setShow}:any)=>{
+  const closeModal = () => {
+    setShow(false)
+  }
+
+  if (show) {
+    return <div className={styles.modalOverlay} onClick={closeModal}>
+      <div className={styles.modalContent} onClick={(e:any) => e.stopPropagation()}>
+        <p>これがモーダルウィンドウです。</p>
+        <button onClick={closeModal}>Close</button>
+      </div>
+    </div>
+  } else {
+    return null;
+  }
+}

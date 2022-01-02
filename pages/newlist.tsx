@@ -13,7 +13,8 @@ const storage = getStorage(firebaseApp)
 const auth = getAuth(firebaseApp);
 
 type FileInfo={
-  filePath:string
+  thumbFilePath:string
+  previewFilePath:string
   id:string
 }
 
@@ -28,28 +29,48 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
   // Promiseの配列
   const tasks: Array<Promise<string|void>> = [];
 
+  let count=0
+
   // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
   snapshot.forEach((document)=>{
     const doc=document.data()
-    if (doc.thumbFilePath){
+    if (doc.thumbFilePath && doc.filePath){
       fileInfoList.push(
         {
-          filePath:doc.thumbFilePath,
+          thumbFilePath:doc.thumbFilePath,
+          previewFilePath:doc.filePath,
           id:document.id
         }
       )
     }
-  })
+  });
 
   // 配列のmapではインデックス番号が取得できるので、
   // 処理の順番が違っても順番通りにtmpImListに格納できる
   // そしてそれらのPromiseをtasksに格納
   fileInfoList.map((fileInfo,index)=>{
-    tasks.push(getDownloadURL(ref(storage,fileInfo.filePath))
-      .then((storageUrl:string)=>{
+    tmpImList[index]={
+      id:fileInfo.id,
+      thumbUrl:"",
+      previewUrl:""
+    }
+
+    // サムネイル画像URL取得処理
+    tasks.push(getDownloadURL(ref(storage,fileInfo.thumbFilePath))
+      .then((thumbUrl:string)=>{
         tmpImList[index]={
-          id:fileInfo.id,
-          url:storageUrl
+          ...tmpImList[index],
+          thumbUrl:thumbUrl
+        }
+      })
+    )
+
+    // プレビュー画像URL取得処理
+    tasks.push(getDownloadURL(ref(storage,fileInfo.previewFilePath))
+      .then((previewUrl:string)=>{
+        tmpImList[index]={
+          ...tmpImList[index],
+          previewUrl:previewUrl
         }
       })
     )
