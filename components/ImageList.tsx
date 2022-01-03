@@ -74,7 +74,7 @@ const PreviewModal=({show,setShow,modalUrl}:any)=>{
   if (show) {
     return <div className={styles.modalOverlay} onClick={closeModal}>
       <div className={`row align-items-center justify-content-center ${styles.modalContent}`}>
-      <div className="col-8" onClick={(e:any) => e.stopPropagation()}>
+      <div className={`col-8 ${styles.white}`} onClick={(e:any) => e.stopPropagation()}>
         <div>
         {
           modalUrl!="" 

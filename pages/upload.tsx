@@ -1,16 +1,16 @@
 import Image from 'next/image'
 import { useState,useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
 
 import Layout from '../components/Layout'
 import firebaseApp from "../components/fire"
-import { useRouter } from 'next/dist/client/router';
 
 const storage = getStorage(firebaseApp)
 const auth = getAuth(firebaseApp);
 
-const Index = () => {
+export default function Index(){
   const [message,setMessage]=useState("wait ...")
   const router = useRouter()
 
@@ -113,5 +113,3 @@ const Upload = () => {
     </div>
   </div>
 };
-
-export default Index

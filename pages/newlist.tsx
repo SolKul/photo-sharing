@@ -5,8 +5,10 @@ import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
 
 import Layout from '../components/Layout'
+import UploadModal from "../components/UploadModal";
 import { ImageList,ImageInfo } from "../components/ImageList";
 import { useRouter } from "next/dist/client/router";
+import styles from '../styles/Home.module.scss'
 
 const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp)
@@ -82,9 +84,12 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 export default function Home(){
   const [message,setMessage]=useState<string>("wait ...")
   const [imList, setImlist] = useState<ImageInfo[]>([])
+  const [show, setShow] = useState<boolean>(false)
+  const [relist, setRelist] = useState<boolean>(true)
   const router=useRouter()
 
   const storeUrl=()=>{
+    console.log("start store url")
     // collection()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
@@ -117,20 +122,24 @@ export default function Home(){
   useEffect(()=>{
     if (auth.currentUser == null){
       router.push('/login')
-    }else{
+    }else if(relist){
+      setRelist(false)
       storeUrl()
     }
-  },[])
+  },[relist])
 
   return (
     <div>
-      <Layout header='Photo Sharing' title='New Photo List page'>
+      <Layout header='Photo Sharing' title='New Photo List page' href="/newlist">
         <div className="container mt-2">
         <p>{message}</p>
         <ImageList imlist={imList}/>
         </div>
+        <div className={`btn ${styles.fixed_btn}`} onClick={()=>(setShow(true))}>
+          <img className={styles.plus_circular_btn} src="./plus-circular-button.svg"></img>
+        </div>
+        <UploadModal show={show} setShow={setShow} setRelist={setRelist} />
       </Layout>
     </div>
   )
 }
-
