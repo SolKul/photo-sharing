@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Image from 'next/image'
 
@@ -67,7 +67,10 @@ export const ImageList = ({ imlist }: ImageListProps) => {
 }
 
 const PreviewModal=({show,setShow,modalUrl}:any)=>{
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const closeModal = () => {
+    setIsLoading(true)
     setShow(false)
   }
 
@@ -76,16 +79,28 @@ const PreviewModal=({show,setShow,modalUrl}:any)=>{
       <div className={`row align-items-center justify-content-center ${styles.modalContent}`}>
       <div className={`col-8 ${styles.white}`} onClick={(e:any) => e.stopPropagation()}>
         <div>
-        {
-          modalUrl!="" 
-          && 
-          <Image 
-            src={modalUrl} 
-            layout="fill" 
-            objectFit="contain" 
-            alt="" 
-          />
-        }
+          {
+              (modalUrl!="")
+            &&
+              <Image 
+                src={modalUrl} 
+                layout="fill" 
+                objectFit="contain" 
+                alt="" 
+                onLoadingComplete={(e)=>{setIsLoading(false)}}
+              />
+          }
+          {/* ロード中は以下を表示しておく */}
+          {
+              isLoading
+            &&
+              <div className={`d-flex justify-content-center align-items-center ${styles.height}`}>
+                {/* 高さを親要素の100%とすることで、上下中央寄せができる */}
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              </div>
+          } 
         </div>
       </div>
       </div>
