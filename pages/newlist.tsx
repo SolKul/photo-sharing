@@ -1,5 +1,5 @@
 import firebaseApp from "../components/fire"
-import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot } from "firebase/firestore";
+import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot, where } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
@@ -82,7 +82,6 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 }
 
 export default function Home(){
-  const [message,setMessage]=useState<string>("wait ...")
   const [imList, setImlist] = useState<ImageInfo[]>([])
   const [show, setShow] = useState<boolean>(false)
   const [relist, setRelist] = useState<boolean>(true)
@@ -99,7 +98,6 @@ export default function Home(){
       getDocs(photoQuery)
       .then(
         (snapshot)=>{
-          setMessage("Success access data")
           const {tmpImList,tasks}=genFetchUrlTasks(snapshot)
 
           // 全てのPromieseが終わったのを待ち、imListにsetする
@@ -108,15 +106,43 @@ export default function Home(){
           })
         },
         (error)=>{
-          setMessage("Failed access data")
           console.log(error)
         }
       )
     }catch(error){
-      setMessage("Failed access data")
       console.log(error)
     }
 
+  }
+
+  const findFile=(fileName:string)=>{
+    try{
+      // collectionへの参照を取得
+      const photoRef = collection(db, "photos");
+      // 写真をアップロード日降順で取得(最新のが1番上に)
+      const filePath=`photos/${fileName}`
+      const photoQuery = query(photoRef, where("filePath", "==", filePath));
+      return getDocs(photoQuery)
+        .then(
+          (snapshot)=>{
+            if (snapshot.empty){
+              console.log("photo didn't find")
+              return false
+            }else{
+              console.log("photo found")
+              return true
+            }
+          },
+          (error)=>{
+            console.log("photo didn't find")
+            console.log(error)
+            return false
+          }
+        )
+    }catch(error){
+      console.log(error)
+      return false
+    }
   }
 
   useEffect(()=>{
@@ -132,13 +158,12 @@ export default function Home(){
     <div>
       <Layout header='Photo Sharing' title='New Photo List page' href="/newlist">
         <div className="container mt-2">
-        <p>{message}</p>
         <ImageList imlist={imList}/>
         </div>
         <div className={`btn ${styles.fixed_btn}`} onClick={()=>(setShow(true))}>
           <img className={styles.plus_circular_btn} src="./plus-circular-button.svg"></img>
         </div>
-        <UploadModal show={show} setShow={setShow} setRelist={setRelist} />
+        <UploadModal show={show} setShow={setShow} setRelist={setRelist} findFile={findFile}/>
       </Layout>
     </div>
   )

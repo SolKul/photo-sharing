@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Image from 'next/image'
 
@@ -53,13 +53,21 @@ export const ImageList = ({ imlist }: ImageListProps) => {
   const listItems = imlist.map((item: ImageInfo) =>
     <div key={item.id} className="col-4 col-lg-3">
       <div onClick={()=>openModal(item.previewUrl)}>
-        <Image src={item.thumbUrl} objectFit="contain" layout="fill" alt="" />
+        <Image 
+          src={item.thumbUrl} 
+          height="300" 
+          width="300"
+          objectFit="contain" 
+          layout="responsive"
+          alt="" 
+        />
       </div>
     </div>
   );
 
   return <div>
     <div className={`row g-0 ${styles.square}`}>
+      {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
       {listItems}
     </div>
     <PreviewModal show={show} setShow={setShow} modalUrl={modalUrl}/>
@@ -67,26 +75,43 @@ export const ImageList = ({ imlist }: ImageListProps) => {
 }
 
 const PreviewModal=({show,setShow,modalUrl}:any)=>{
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const closeModal = () => {
+    setIsLoading(true)
     setShow(false)
   }
 
   if (show) {
     return <div className={styles.modalOverlay} onClick={closeModal}>
-      <div className={`row align-items-center justify-content-center ${styles.modalContent}`}>
-      <div className={`col-8 ${styles.white}`} onClick={(e:any) => e.stopPropagation()}>
-        <div>
+      <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
+      <div className={`col-11 col-lg-5 ${styles.white}`} onClick={(e:any) => e.stopPropagation()}>  
         {
-          modalUrl!="" 
-          && 
-          <Image 
-            src={modalUrl} 
-            layout="fill" 
-            objectFit="contain" 
-            alt="" 
-          />
+          modalUrl!=""
+            &&
+          <div>
+            <Image 
+              src={modalUrl} 
+              width={500}
+              height={500}
+              objectFit="contain" 
+              layout="responsive"
+              alt="" 
+              onLoadingComplete={(e)=>{setIsLoading(false)}}
+            />
+          </div>
         }
-        </div>
+        {/* ロード中は以下を表示しておく */}
+        {
+          isLoading
+            &&
+          <div className={`d-flex justify-content-center align-items-center`}>
+            {/* 高さを親要素の100%とすることで、上下中央寄せができる */}
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          </div>
+        } 
       </div>
       </div>
     </div>
