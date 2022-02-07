@@ -159,6 +159,7 @@ const UploadSection = ({
         <input className="form-control-file mb-1"
           // allows you to reach into your file directory and upload image to the browser
           type="file"
+          accept='image/*'
           onChange={handleFileChange}
         />
         <button disabled={!clickable} className="btn btn-primary">アップロード</button>
