@@ -1,48 +1,62 @@
 import { useState, useEffect } from 'react';
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import Image from 'next/image'
+import loadImage,{LoadImageOptions }from 'blueimp-load-image';
 
 import firebaseApp from "../components/fire"
 import styles from '../styles/Home.module.scss'
 
 const storage = getStorage(firebaseApp)
 
-export default function UploadModal({ show, setShow, setRelist,findFile }: any) {
-  const [imageAsFile, setImageAsFile] = useState<File|null>(null)
-  const [blobUrl, setBlobUrl] = useState<string>("")
+const c = "abcdefghijklmnopqrstuvwxyz0123456789";
+const cl = c.length;
+
+export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
+  const [imageUrl, setImageUrl] = useState<string>("")
   const [clickable, setClickable] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [fileName,setFileName]=useState<string>("")
+  const [blobedImage,setBlobedImage]=useState<Blob>()
 
   // Eventの型は一回間違えてからエラーが出たところに
   // VSCode上でオーバーレイしてヒントを出すとわかる。
   // また、FooBarHandlerとなっている関数の引数の型はそのFooBarの部分
   // 例：ChangeEventHandlerの場合、引数の型はChangeEventの部分
-  const handleImageAsFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-    const files = e.target.files
-    if (! files.length) return;
-    try{
-      setImageAsFile((imageFile: File|null) => (files[0]))
-      setClickable(true)
-      handlePreview(files[0])
-    }catch(error){
-      console.error(error)
-    } 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target && e.target.files && e.target.files[0]
+    if (!file) return;
+    convertFiletoBlob(file)
   }
 
-  const handlePreview = (file: File) => {
-    var reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      setBlobUrl(reader.result as string);
-    };
-  };
+  const convertFiletoBlob=(file:File)=>{
+    setFileName(file.name)
 
-  const closeModal = () => {
-    setIsLoading(false)
-    setBlobUrl("")
-    setClickable(false)
-    setShow(false)
+    const options:LoadImageOptions={
+      maxWidth: 600,
+      maxHeight: 600,
+      canvas:true
+    };
+
+    // blueimp-load-image: https://github.com/blueimp/JavaScript-Load-Image
+    loadImage(
+      file,
+      (canvas)=>{
+        const isCanvas = window.HTMLCanvasElement && canvas instanceof HTMLCanvasElement
+        if (!isCanvas){
+          console.error("Loading image file failed")
+          return
+        }
+        canvas.toBlob((blob)=>{
+          if (!blob) return
+          setBlobedImage(blob)
+          setImageUrl(URL.createObjectURL(blob))
+          setClickable(true)
+        },
+        'image/jpeg')
+      },
+      options
+    )
+
   }
 
   const handleFireBaseUpload = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,12 +64,20 @@ export default function UploadModal({ show, setShow, setRelist,findFile }: any) 
     console.log('start of upload')
     setIsLoading(true)
     // async magic goes here...
-    if (imageAsFile === null || imageAsFile === undefined) {
-      console.error(`not an image, the image file is a ${typeof (imageAsFile)}`)
+    if (!blobedImage) {
+      console.error(`not an image, the image file is a ${typeof (blobedImage)}`)
       setIsLoading(false)
     } else {
-      const storageRef = ref(storage, `/photos/${imageAsFile.name}`)
-      const uploadTask = uploadBytesResumable(storageRef, imageAsFile)
+
+      var r = "";
+      for(var i=0; i<5; i++){
+        r += c[Math.floor(Math.random()*cl)];
+      }
+
+      const randFileName=`${r}_${fileName}`
+
+      const storageRef = ref(storage, `/photos/${randFileName}`)
+      const uploadTask = uploadBytesResumable(storageRef, blobedImage)
       //initiates the firebase side uploading 
       //https://firebase.google.com/docs/storage/web/upload-files?hl=ja#monitor_upload_progress
       //このドキュメントだけ呼んだだけだと分かりにくいが、
@@ -70,7 +92,7 @@ export default function UploadModal({ show, setShow, setRelist,findFile }: any) 
           //catches the errors
           console.log(err)
         }, () => {
-          endUpload(imageAsFile.name)
+          endUpload(randFileName)
         }
       )
     }
@@ -84,8 +106,15 @@ export default function UploadModal({ show, setShow, setRelist,findFile }: any) 
         break;
       }
     }
-    setRelist(true)
+    storeUrl()
     closeModal()
+  }
+
+  const closeModal = () => {
+    setIsLoading(false)
+    setImageUrl("")
+    setClickable(false)
+    setShow(false)
   }
 
   if (show) {
@@ -103,11 +132,11 @@ export default function UploadModal({ show, setShow, setRelist,findFile }: any) 
             </div>
             </div>
               : 
-            <UploadContent 
-              handleFireBaseUpload={handleFireBaseUpload} 
-              handleImageAsFile={handleImageAsFile}
+            <UploadSection 
               clickable={clickable}
-              blobUrl={blobUrl}
+              imageUrl={imageUrl}
+              handleFileChange={handleFileChange}
+              handleFireBaseUpload={handleFireBaseUpload}
             />
           }
         </div>
@@ -118,24 +147,29 @@ export default function UploadModal({ show, setShow, setRelist,findFile }: any) 
   }
 }
 
-const UploadContent = ({handleFireBaseUpload,handleImageAsFile,clickable,blobUrl}:any)=>{
+const UploadSection = ({
+    clickable,
+    imageUrl,
+    handleFileChange,
+    handleFireBaseUpload
+  }:any)=>{
   return  <div className="p-3">
     <div className={styles.upload_form}>
       <form className="form-group" onSubmit={handleFireBaseUpload}>
         <input className="form-control-file mb-1"
           // allows you to reach into your file directory and upload image to the browser
           type="file"
-          onChange={handleImageAsFile}
+          onChange={handleFileChange}
         />
         <button disabled={!clickable} className="btn btn-primary">アップロード</button>
       </form>
     </div>
     {
-      blobUrl
+      imageUrl
         && 
       <div className={styles.upload_preview}>
         <Image 
-          src={blobUrl}
+          src={imageUrl}
           height="210" 
           width="300"
           objectFit="contain" 

@@ -148,11 +148,10 @@ export default function Home(){
   useEffect(()=>{
     if (auth.currentUser == null){
       router.push('/login')
-    }else if(relist){
-      setRelist(false)
+    }else{
       storeUrl()
     }
-  },[relist])
+  },[])
 
   return (
     <div>
@@ -163,7 +162,7 @@ export default function Home(){
         <div className={`btn ${styles.fixed_btn}`} onClick={()=>(setShow(true))}>
           <img className={styles.plus_circular_btn} src="./plus-circular-button.svg"></img>
         </div>
-        <UploadModal show={show} setShow={setShow} setRelist={setRelist} findFile={findFile}/>
+        <UploadModal show={show} setShow={setShow} storeUrl={storeUrl} findFile={findFile}/>
       </Layout>
     </div>
   )
