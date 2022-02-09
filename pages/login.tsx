@@ -73,7 +73,7 @@ export default function Home(){
           console.log(result)
           setMessage("認証しました")
           user.getIdToken(true).then(()=>{
-            router.push("/newlist")
+            router.push("/")
           })
         },
         (error)=>{
@@ -106,7 +106,7 @@ export default function Home(){
         {/* <div className="form-text text-start col-11">認証コードは4桁です</div>
         <div></div> */}
         <div className="col-11 col-md-6">
-          <input className="form-control form-control-lg" type="number" id="code" onChange={doChangeCode} value={code} ></input>
+          <input className="form-control form-control-lg" type="number" id="code" onChange={doChangeCode} value={code} autoComplete="off" ></input>
         </div>
         <div></div>
         <input type="submit" className="col-11 col-md-6 btn btn-primary" onClick={doLogin} value="ログイン" />

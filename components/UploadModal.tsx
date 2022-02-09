@@ -121,7 +121,7 @@ export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
     return <div className={styles.modalOverlay} onClick={closeModal}>
       <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
         {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
-        <div className={`col-10 rounded ${styles.upload_modal}`} onClick={(e: any) => e.stopPropagation()}>
+        <div className={`col-10 col-lg-5 rounded ${styles.upload_modal}`} onClick={(e: any) => e.stopPropagation()}>
           {
             isLoading
               ?
