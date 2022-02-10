@@ -176,6 +176,7 @@ const UploadSection = ({
           objectFit="contain" 
           layout="responsive"
           alt="" 
+          unoptimized={true}
         />
       </div>
     }

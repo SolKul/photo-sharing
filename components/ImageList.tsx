@@ -60,6 +60,7 @@ export const ImageList = ({ imlist }: ImageListProps) => {
           objectFit="contain" 
           layout="responsive"
           alt="" 
+          unoptimized={true}
         />
       </div>
     </div>
@@ -97,6 +98,7 @@ const PreviewModal=({show,setShow,modalUrl}:any)=>{
               objectFit="contain" 
               layout="responsive"
               alt="" 
+              unoptimized={true}
               onLoadingComplete={(e)=>{setIsLoading(false)}}
             />
           </div>
