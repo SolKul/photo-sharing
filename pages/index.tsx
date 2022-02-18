@@ -54,7 +54,8 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
     tmpImList[index]={
       id:fileInfo.id,
       thumbUrl:"",
-      previewUrl:""
+      previewUrl:"",
+      valid:true
     }
 
     // サムネイル画像URL取得処理
@@ -64,6 +65,11 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
           ...tmpImList[index],
           thumbUrl:thumbUrl
         }
+      },()=>{        
+        tmpImList[index]={
+          ...tmpImList[index],
+          valid:false
+        } 
       })
     )
 
@@ -74,6 +80,11 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
           ...tmpImList[index],
           previewUrl:previewUrl
         }
+      },()=>{        
+        tmpImList[index]={
+          ...tmpImList[index],
+          valid:false
+        } 
       })
     )
   })
@@ -83,7 +94,6 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 
 export default function Home(){
   const [imList, setImlist] = useState<ImageInfo[]>([])
-  const [relist, setRelist] = useState<boolean>(true)
   const router=useRouter()
 
   const storeUrl=()=>{

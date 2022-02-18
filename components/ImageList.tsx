@@ -8,6 +8,7 @@ export type ImageInfo = {
   id: string
   thumbUrl: string
   previewUrl:string
+  valid:boolean
 }
 
 type ImageListProps = {
@@ -49,22 +50,24 @@ export const ImageList = ({ imlist }: ImageListProps) => {
   }
 
   // imlistからitemを取り出し、item.idとitem.urlを組み込んで
-  // li要素配列を生成する。
-  const listItems = imlist.map((item: ImageInfo) =>
-    <div key={item.id} className="col-4 col-lg-3">
-      <div onClick={()=>openModal(item.previewUrl)}>
-        <Image 
-          src={item.thumbUrl} 
-          height="300" 
-          width="300"
-          objectFit="contain" 
-          layout="responsive"
-          alt="" 
-          unoptimized={true}
-        />
+  // 配列を生成する。
+  const listItems = imlist.map((item: ImageInfo) =>{
+    if (item.valid){
+      return <div key={item.id} className="col-4 col-lg-3">
+        <div onClick={()=>openModal(item.previewUrl)}>
+          <Image 
+            src={item.thumbUrl} 
+            height="300" 
+            width="300"
+            objectFit="contain" 
+            layout="responsive"
+            alt="" 
+            unoptimized={true}
+          />
+        </div>
       </div>
-    </div>
-  );
+    }
+  });
 
   return <div>
     <div className={`row g-0 ${styles.square}`}>
