@@ -3,7 +3,7 @@ import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import Image from 'next/image'
 import loadImage,{LoadImageOptions }from 'blueimp-load-image';
 
-import firebaseApp from "../components/fire"
+import firebaseApp from "./fire"
 import styles from '../styles/Home.module.scss'
 
 const storage = getStorage(firebaseApp)
@@ -11,13 +11,63 @@ const storage = getStorage(firebaseApp)
 const c = "abcdefghijklmnopqrstuvwxyz0123456789";
 const cl = c.length;
 
-export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
+export default function UploadLayer({storeUrl,findFile}:any){
+  const [modalAppear, setModalAppear] = useState<boolean>(false)
+  const [btnAppear, setBtnAppear] = useState<boolean>(true)
+  const [uploading, setUploading] = useState<boolean>(false);
+
+  const openModal=(e:any)=>{
+    setModalAppear(true)
+    setBtnAppear(false)
+  }
+
+  const closeModal=()=>{
+    setModalAppear(false)
+    setBtnAppear(true)
+  }
+
+  const startUpload=()=>{
+    setUploading(true)
+    setModalAppear(false)
+  }
+
+  const endUpload=(e:any)=>{
+    storeUrl()
+    setUploading(false)
+    setBtnAppear(true)
+  }
+
+  return <div>
+    <UploadModal 
+      modalAppear={modalAppear}
+      closeModal={closeModal}
+      startUpload={startUpload}
+      endUpload={endUpload}
+      findFile={findFile} 
+    />
+    {
+      btnAppear
+        &&
+      <UploadBtn openModal={openModal} />
+    }{
+      uploading
+        &&
+      <UploadStatusBar />
+    }
+  </div>
+}
+
+const UploadModal=({ 
+    modalAppear,
+    closeModal,
+    startUpload,
+    endUpload,
+    findFile }: any) =>{
   const [imageUrl, setImageUrl] = useState<string>("")
   const [clickable, setClickable] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fileName,setFileName]=useState<string>("")
   const [blobedImage,setBlobedImage]=useState<Blob>()
-
+  
   // Eventの型は一回間違えてからエラーが出たところに
   // VSCode上でオーバーレイしてヒントを出すとわかる。
   // また、FooBarHandlerとなっている関数の引数の型はそのFooBarの部分
@@ -28,6 +78,10 @@ export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
     convertFiletoBlob(file)
   }
 
+  /**
+   * 受け取った画像を圧縮し、Exifのorientationを反映した画像blobを生成
+   * 詳しくはblueimp-load-imageのリポジトリ、特にdemo.jsを参照
+   */
   const convertFiletoBlob=(file:File)=>{
     setFileName(file.name)
 
@@ -37,10 +91,10 @@ export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
       canvas:true
     };
 
-    // blueimp-load-image: https://github.com/blueimp/JavaScript-Load-Image
     loadImage(
       file,
       (canvas)=>{
+        // optionでcanvas:trueとしているので、コールバック関数の引数はcanvasのはず。
         const isCanvas = window.HTMLCanvasElement && canvas instanceof HTMLCanvasElement
         if (!isCanvas){
           console.error("Loading image file failed")
@@ -61,14 +115,11 @@ export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
 
   const handleFireBaseUpload = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log('start of upload')
-    setIsLoading(true)
     // async magic goes here...
     if (!blobedImage) {
       console.error(`not an image, the image file is a ${typeof (blobedImage)}`)
-      setIsLoading(false)
     } else {
-
+      startUpload()
       var r = "";
       for(var i=0; i<5; i++){
         r += c[Math.floor(Math.random()*cl)];
@@ -92,13 +143,18 @@ export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
           //catches the errors
           console.log(err)
         }, () => {
-          endUpload(randFileName)
+          checkUpload(randFileName).then(
+            ()=>{
+              clearState()
+              endUpload()
+            }
+          )
         }
       )
     }
   }
 
-  const endUpload=async (fileName:string)=>{
+  const checkUpload=async (fileName:string)=>{
     for (let i =0; i<5; i++){
       await new Promise(resolve => setTimeout(resolve, 3000))
       let success = await findFile(fileName)
@@ -106,45 +162,37 @@ export default function UploadModal({ show, setShow, storeUrl,findFile }: any) {
         break;
       }
     }
-    storeUrl()
+  }
+
+  const clearState=()=>{
+    setImageUrl("")
+    setClickable(false)
+  }
+
+  const cancelModal=()=>{
+    clearState()
     closeModal()
   }
 
-  const closeModal = () => {
-    setIsLoading(false)
-    setImageUrl("")
-    setClickable(false)
-    setShow(false)
-  }
-
-  if (show) {
-    return <div className={styles.modalOverlay} onClick={closeModal}>
-      <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
-        {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
-        <div className={`col-10 col-lg-5 rounded ${styles.upload_modal}`} onClick={(e: any) => e.stopPropagation()}>
-          {
-            isLoading
-              ?
-            <div className={`d-flex justify-content-center align-items-center`}>
-            {/* 高さを親要素の100%とすることで、上下中央寄せができる */}
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            </div>
-              : 
+  return <div>
+    {
+      modalAppear
+        &&
+      <div className={styles.modalOverlay} onClick={cancelModal}>
+        <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
+          {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
+          <div className={`col-10 col-lg-5 rounded ${styles.upload_modal}`} onClick={(e: any) => e.stopPropagation()}>
             <UploadSection 
               clickable={clickable}
               imageUrl={imageUrl}
               handleFileChange={handleFileChange}
               handleFireBaseUpload={handleFireBaseUpload}
             />
-          }
+          </div>
         </div>
       </div>
-    </div>
-  } else {
-    return null;
-  }
+    }
+  </div>
 }
 
 const UploadSection = ({
@@ -167,8 +215,9 @@ const UploadSection = ({
     </div>
     {
       imageUrl
-        && 
+        ? 
       <div className={styles.upload_preview}>
+        {/* upload_preview　が 70:100なので、210:300とする */}
         <Image 
           src={imageUrl}
           height="210" 
@@ -179,6 +228,20 @@ const UploadSection = ({
           unoptimized={true}
         />
       </div>
+        :
+      "※圧縮してアップロードするのでギガを気にせずアップロードできます！" 
     }
     </div>
+}
+
+const UploadBtn=({openModal}:any)=>{
+  return <div className={`btn ${styles.fixed_btn}`} onClick={openModal}>
+  <img className={styles.plus_circular_btn} src="./plus-circular-button.svg"></img>
+</div>;
+}
+
+const UploadStatusBar=()=>{
+  return <div className={`row justify-content-center ${styles.fixed_upload_status}`}>
+    <div className='col-10 col-lg-5'>アップロード中…</div>
+  </div>
 }

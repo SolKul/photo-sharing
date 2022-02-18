@@ -5,7 +5,7 @@ import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
 
 import Layout from '../components/Layout'
-import UploadModal from "../components/UploadModal";
+import UploadLayer from "../components/UploadLayer";
 import { ImageList,ImageInfo } from "../components/ImageList";
 import { useRouter } from "next/dist/client/router";
 import styles from '../styles/Home.module.scss'
@@ -83,7 +83,6 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 
 export default function Home(){
   const [imList, setImlist] = useState<ImageInfo[]>([])
-  const [show, setShow] = useState<boolean>(false)
   const [relist, setRelist] = useState<boolean>(true)
   const router=useRouter()
 
@@ -115,31 +114,22 @@ export default function Home(){
 
   }
 
-  const findFile=(fileName:string)=>{
+  const findFile=async (fileName:string)=>{
     try{
       // collectionへの参照を取得
       const photoRef = collection(db, "photos");
-      // 写真をアップロード日降順で取得(最新のが1番上に)
       const filePath=`photos/${fileName}`
       const photoQuery = query(photoRef, where("filePath", "==", filePath));
-      return getDocs(photoQuery)
-        .then(
-          (snapshot)=>{
-            if (snapshot.empty){
-              console.log("photo didn't find")
-              return false
-            }else{
-              console.log("photo found")
-              return true
-            }
-          },
-          (error)=>{
-            console.log("photo didn't find")
-            console.log(error)
-            return false
-          }
-        )
+      const snapshot = await getDocs(photoQuery)
+      if (snapshot.empty){
+        console.log("photo didn't find")
+        return false
+      }else{
+        console.log("photo found")
+        return true
+      }
     }catch(error){
+      console.log("photo didn't find")
       console.log(error)
       return false
     }
@@ -158,11 +148,8 @@ export default function Home(){
       <Layout header='Photo Sharing' title='Photo Sharing' href="/">
         <div className="container mt-2">
         <ImageList imlist={imList}/>
+        <UploadLayer storeUrl={storeUrl} findFile={findFile}/>
         </div>
-        <div className={`btn ${styles.fixed_btn}`} onClick={()=>(setShow(true))}>
-          <img className={styles.plus_circular_btn} src="./plus-circular-button.svg"></img>
-        </div>
-        <UploadModal show={show} setShow={setShow} storeUrl={storeUrl} findFile={findFile}/>
       </Layout>
     </div>
   )
