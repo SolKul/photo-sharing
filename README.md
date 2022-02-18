@@ -2,8 +2,6 @@
 
 写真を共有します
 
-※fire.tsxに認証情報があるので公開禁止！
-
 # todo
 
 
@@ -24,10 +22,100 @@
 + [x] アップロードページをモーダルに
 + [x] 写真プレビューローディング
 + [x] アップロードローディング
-+ [ ] cloud function 写真プレビュー用サムネイル
++ [x] cloud function 写真プレビュー用サムネイル→blueimp-load-imageを使って圧縮してアップロード
++ [x] アップロードローディングをバックグラウンドに
++ [ ] アップデート終了をポーリングではなくリアルタイムアップデートに
 + [ ] 複数画像アップロード
 + [ ] 写真プレビューページを複数ページに→
 https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_query
 + [ ] グループ紹介ページ
 + [ ] セットリスト
 + [ ] スライドショー
++ [ ] 初回アクセスのみ使用方法アナウンス
+
+# 写真アップロード
+
+## ステート
+
+- modalAppear: モーダルが見えるか
+- btnAppear: アップロードボタンが見えるか
+- uploading: アップロード中か
+- imageUrl: 画像のdata url
+- clickable: アップロードボタン押下可能か
+- fileName: ファイル名
+- blobledImage: 圧縮したblob画像
+
+## 通常時
+
+1. 初期状態
+    1. modalAppear:false
+    1. btnAppear:true
+    1. uploading:false
+1. アップロードボタンクリック
+    1. modalAppearをtrue
+    1. btnAppearをfalse
+1. 写真選択
+    1. imageUrlにblobのdata url
+    1. clickableをtrue
+1. 写真アップロード
+    1. uploadingをtrue
+    1. modalAppearをfalse
+1. 写真アップロード完了
+    1. findFileを待つ
+    1. imageUrlを""に
+    1. clickableをfalse
+    1. uploadingをfalse
+    1. btnAppearをtrue
+
+## モーダルキャンセル時
+
+1. 初期状態
+    1. modalAppear:false
+    1. btnAppear:true
+    1. uploading:false
+1. アップロードボタンクリック
+    1. modalAppearをtrue
+    1. btnAppearをfalse
+1. モーダル外をタップ
+    1. imageUrlを""に
+    1. clickableをfalse
+    1. modalAppearをfalse
+    1. btnAppearをtrue
+
+- UploadLayer
+    - Btn
+    - UploadModal
+        - アップロードセクション
+    - UploadStatus
+
+## UploadLayer
+
+- ステート
+    - modalAppear: モーダルが見えるか
+    - btnAppear: アップロードボタンが見えるか
+    - uploading: アップロード中か
+- 関数
+    - モーダル開く処理
+    - モーダル閉じる処理
+    - アップロード開始時処理
+    - アップロード終了時処理
+
+## UploadModal
+
+- 管理するステート
+    - imageUrl: 画像のdata url
+    - clickable: アップロードボタン押下可能か
+    - fileName: ファイル名
+    - blobledImage: 圧縮したblob画像
+- 関数
+    - 写真選択時処理
+    - アップロード処理
+    - アップロード完了判定処理
+    - ステートをクリアにする処理
+- もらうステート
+    - modalAppear
+- もらう関数
+    - モーダル閉じる処理
+    - アップロード開始時処理
+    - アップロード終了時処理
+

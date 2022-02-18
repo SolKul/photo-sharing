@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Header from './Header'
-import Footer from './Footer'
 
 export default function Layout({children,title,header,href="/"}:any){
   return (
@@ -9,8 +8,7 @@ export default function Layout({children,title,header,href="/"}:any){
         <title>{title}</title>
       </Head>
       <Header header={header} href={href}/>
-        {children}
-      <Footer footer="This is footer" />
+      {children}
     </div>
   )
 }
