@@ -33,7 +33,7 @@ https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_q
 + [ ] スライドショー
 + [ ] 初回アクセスのみ使用方法アナウンス
 
-# 写真アップロード
+# UploadLayerコンポーネント
 
 ## ステート
 
