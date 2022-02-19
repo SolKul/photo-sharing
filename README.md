@@ -1,3 +1,22 @@
+# updateDiffImagesブランチ
+
+
+imagesListをオブジェクト化し、onSnapshotの更新があったところだけgenDownloadUrlし、スプレッド構文
+
+```typescript
+setImlist((prevList:any)=>{return {...prevList,...tmpImList}})
+```
+
+を使って`imList`を更新する
+
+メリット
+
+- onSnapshotの差分のみgenDownloadUrlするので、処理が軽くなる
+
+todo
+- ImageListコンポーネントでimListの`timeCreated`をもとに降順に並び替えてから描写
+- 今は不適切画像を単純にStorageから削除すれば、手元でも見えなくなるが、オブジェクト化し差分だけ追加すると画像が手元に残り続ける→画像削除フォームを作る必要がある
+
 # Photo Sharing Project
 
 写真を共有します
