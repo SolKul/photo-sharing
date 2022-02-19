@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import Image from 'next/image'
 import loadImage,{LoadImageOptions }from 'blueimp-load-image';
@@ -11,7 +11,7 @@ const storage = getStorage(firebaseApp)
 const c = "abcdefghijklmnopqrstuvwxyz0123456789";
 const cl = c.length;
 
-export default function UploadLayer({storeUrl,findFile}:any){
+export default function UploadLayer(){
   const [modalAppear, setModalAppear] = useState<boolean>(false)
   const [btnAppear, setBtnAppear] = useState<boolean>(true)
   const [uploading, setUploading] = useState<boolean>(false);
@@ -32,7 +32,6 @@ export default function UploadLayer({storeUrl,findFile}:any){
   }
 
   const endUpload=(e:any)=>{
-    storeUrl()
     setUploading(false)
     setBtnAppear(true)
   }
@@ -43,7 +42,6 @@ export default function UploadLayer({storeUrl,findFile}:any){
       closeModal={closeModal}
       startUpload={startUpload}
       endUpload={endUpload}
-      findFile={findFile} 
     />
     {
       btnAppear
@@ -61,8 +59,7 @@ const UploadModal=({
     modalAppear,
     closeModal,
     startUpload,
-    endUpload,
-    findFile }: any) =>{
+    endUpload }: any) =>{
   const [imageUrl, setImageUrl] = useState<string>("")
   const [clickable, setClickable] = useState(false);
   const [fileName,setFileName]=useState<string>("")
@@ -143,25 +140,10 @@ const UploadModal=({
           //catches the errors
           console.log(err)
         }, () => {
-          checkUpload(randFileName).then(
-            ()=>{
-              clearState()
-              endUpload()
-            }
-          )
+            endUpload()
         }
-      )
-    }
-  }
-
-  const checkUpload=async (fileName:string)=>{
-    for (let i =0; i<5; i++){
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      let success = await findFile(fileName)
-      if (success){
-        break;
-      }
-    }
+      )// end on
+    } //end else
   }
 
   const clearState=()=>{

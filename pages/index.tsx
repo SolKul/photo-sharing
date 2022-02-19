@@ -1,5 +1,5 @@
 import firebaseApp from "../components/fire"
-import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot, where } from "firebase/firestore";
+import { getFirestore,collection, query, orderBy, QuerySnapshot, onSnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
@@ -54,7 +54,8 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
     tmpImList[index]={
       id:fileInfo.id,
       thumbUrl:"",
-      previewUrl:""
+      previewUrl:"",
+      valid:true
     }
 
     // サムネイル画像URL取得処理
@@ -64,6 +65,11 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
           ...tmpImList[index],
           thumbUrl:thumbUrl
         }
+      },()=>{        
+        tmpImList[index]={
+          ...tmpImList[index],
+          valid:false
+        } 
       })
     )
 
@@ -74,6 +80,11 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
           ...tmpImList[index],
           previewUrl:previewUrl
         }
+      },()=>{        
+        tmpImList[index]={
+          ...tmpImList[index],
+          valid:false
+        } 
       })
     )
   })
@@ -83,55 +94,34 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 
 export default function Home(){
   const [imList, setImlist] = useState<ImageInfo[]>([])
-  const [relist, setRelist] = useState<boolean>(true)
   const router=useRouter()
 
-  const storeUrl=()=>{
-    console.log("start store url")
+  const fetchImage=()=>{
+    console.log("start fetch images")
     // collection()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
       const photoRef = collection(db, "photos");
       // 写真をアップロード日降順で取得(最新のが1番上に)
       const photoQuery = query(photoRef, orderBy("timeCreated","desc"));
-      getDocs(photoQuery)
-      .then(
+      // 更新をサブスクライブする
+      const unsubscribe = onSnapshot(
+        photoQuery,
         (snapshot)=>{
+          console.log("写真がアップデートされた")
           const {tmpImList,tasks}=genFetchUrlTasks(snapshot)
-
           // 全てのPromieseが終わったのを待ち、imListにsetする
           Promise.all(tasks).then(() => {
             setImlist(tmpImList)
-          })
-        },
-        (error)=>{
-          console.log(error)
-        }
-      )
+          })// end Promise
+        } // end Callback
+      ) // end onSnapshot
+      // useEffectのreturnに関数を渡すことで、
+      // unmount時に関数を実行するので、
+      // unmount時にlistenを止めるためにunsubscribeを返す
+      return unsubscribe
     }catch(error){
       console.log(error)
-    }
-
-  }
-
-  const findFile=async (fileName:string)=>{
-    try{
-      // collectionへの参照を取得
-      const photoRef = collection(db, "photos");
-      const filePath=`photos/${fileName}`
-      const photoQuery = query(photoRef, where("filePath", "==", filePath));
-      const snapshot = await getDocs(photoQuery)
-      if (snapshot.empty){
-        console.log("photo didn't find")
-        return false
-      }else{
-        console.log("photo found")
-        return true
-      }
-    }catch(error){
-      console.log("photo didn't find")
-      console.log(error)
-      return false
     }
   }
 
@@ -139,7 +129,7 @@ export default function Home(){
     if (auth.currentUser == null){
       router.push('/login')
     }else{
-      storeUrl()
+      return fetchImage()
     }
   },[])
 
@@ -148,7 +138,7 @@ export default function Home(){
       <Layout header='Photo Sharing' title='Photo Sharing' href="/">
         <div className="container mt-2">
         <ImageList imlist={imList}/>
-        <UploadLayer storeUrl={storeUrl} findFile={findFile}/>
+        <UploadLayer/>
         </div>
       </Layout>
     </div>
