@@ -140,7 +140,8 @@ const UploadModal=({
           //catches the errors
           console.log(err)
         }, () => {
-            endUpload()
+          clearState()
+          endUpload()
         }
       )// end on
     } //end else
