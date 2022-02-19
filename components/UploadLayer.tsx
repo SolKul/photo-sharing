@@ -11,7 +11,7 @@ const storage = getStorage(firebaseApp)
 const c = "abcdefghijklmnopqrstuvwxyz0123456789";
 const cl = c.length;
 
-export default function UploadLayer({storeUrl,findFile}:any){
+export default function UploadLayer({fetchImage,postUpload}:any){
   const [modalAppear, setModalAppear] = useState<boolean>(false)
   const [btnAppear, setBtnAppear] = useState<boolean>(true)
   const [uploading, setUploading] = useState<boolean>(false);
@@ -32,7 +32,7 @@ export default function UploadLayer({storeUrl,findFile}:any){
   }
 
   const endUpload=(e:any)=>{
-    storeUrl()
+    fetchImage()
     setUploading(false)
     setBtnAppear(true)
   }
@@ -43,7 +43,7 @@ export default function UploadLayer({storeUrl,findFile}:any){
       closeModal={closeModal}
       startUpload={startUpload}
       endUpload={endUpload}
-      findFile={findFile} 
+      postUpload={postUpload} 
     />
     {
       btnAppear
@@ -62,7 +62,7 @@ const UploadModal=({
     closeModal,
     startUpload,
     endUpload,
-    findFile }: any) =>{
+    postUpload }: any) =>{
   const [imageUrl, setImageUrl] = useState<string>("")
   const [clickable, setClickable] = useState(false);
   const [fileName,setFileName]=useState<string>("")
@@ -143,7 +143,8 @@ const UploadModal=({
           //catches the errors
           console.log(err)
         }, () => {
-          checkUpload(randFileName).then(
+          postUpload(
+            randFileName,
             ()=>{
               clearState()
               endUpload()
@@ -151,16 +152,6 @@ const UploadModal=({
           )
         }
       )
-    }
-  }
-
-  const checkUpload=async (fileName:string)=>{
-    for (let i =0; i<5; i++){
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      let success = await findFile(fileName)
-      if (success){
-        break;
-      }
     }
   }
 

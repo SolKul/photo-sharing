@@ -24,7 +24,8 @@
 + [x] アップロードローディング
 + [x] cloud function 写真プレビュー用サムネイル→blueimp-load-imageを使って圧縮してアップロード
 + [x] アップロードローディングをバックグラウンドに
-+ [ ] アップデート終了をポーリングではなくリアルタイムアップデートに
++ [x] アップデート終了をポーリングではなく`onSnapshot`に
++ [x] `onSnapshot`で写真更新
 + [ ] 複数画像アップロード
 + [ ] 写真プレビューページを複数ページに→
 https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_query

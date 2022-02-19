@@ -1,5 +1,5 @@
 import firebaseApp from "../components/fire"
-import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot, where } from "firebase/firestore";
+import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot, where,Unsubscribe,onSnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
@@ -96,8 +96,8 @@ export default function Home(){
   const [imList, setImlist] = useState<ImageInfo[]>([])
   const router=useRouter()
 
-  const storeUrl=()=>{
-    console.log("start store url")
+  const fetchImage=()=>{
+    console.log("start fetch images")
     // collection()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
@@ -124,24 +124,24 @@ export default function Home(){
 
   }
 
-  const findFile=async (fileName:string)=>{
+  const postUpload=(fileName:string,afterDataAdded:()=>void)=>{
     try{
       // collectionへの参照を取得
       const photoRef = collection(db, "photos");
       const filePath=`photos/${fileName}`
       const photoQuery = query(photoRef, where("filePath", "==", filePath));
-      const snapshot = await getDocs(photoQuery)
-      if (snapshot.empty){
-        console.log("photo didn't find")
-        return false
-      }else{
-        console.log("photo found")
-        return true
-      }
+      const unsubscribe =onSnapshot(
+        photoQuery,
+        (querysnapShot)=>{
+          if(!querysnapShot.empty){
+            console.log("file found")
+            afterDataAdded()
+            unsubscribe()
+          }
+        }
+      )
     }catch(error){
-      console.log("photo didn't find")
-      console.log(error)
-      return false
+      afterDataAdded()
     }
   }
 
@@ -149,7 +149,7 @@ export default function Home(){
     if (auth.currentUser == null){
       router.push('/login')
     }else{
-      storeUrl()
+      fetchImage()
     }
   },[])
 
@@ -158,7 +158,7 @@ export default function Home(){
       <Layout header='Photo Sharing' title='Photo Sharing' href="/">
         <div className="container mt-2">
         <ImageList imlist={imList}/>
-        <UploadLayer storeUrl={storeUrl} findFile={findFile}/>
+        <UploadLayer fetchImage={fetchImage} postUpload={postUpload}/>
         </div>
       </Layout>
     </div>
