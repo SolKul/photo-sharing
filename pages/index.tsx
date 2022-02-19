@@ -49,6 +49,11 @@ export default function Home(){
           </Link>
         </div>
         <div>
+          <Link href="/sample">
+            <a>Sample Page</a>
+          </Link>
+        </div>
+        <div>
           <Link href="/login">
             <a onClick={doLogout}>Logout</a>
           </Link>

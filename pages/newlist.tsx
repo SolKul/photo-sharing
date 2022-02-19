@@ -156,7 +156,7 @@ export default function Home(){
 
   return (
     <div>
-      <Layout header='Photo Sharing' title='New Photo List page' href="/newlist">
+      <Layout header='Photo Sharing' title='New Photo List page' href="/">
         <div className="container mt-2">
         <ImageList imlist={imList}/>
         </div>

@@ -73,7 +73,7 @@ export default function Home(){
           console.log(result)
           setMessage("認証しました")
           user.getIdToken(true).then(()=>{
-            router.push("/newlist")
+            router.push("/")
           })
         },
         (error)=>{
