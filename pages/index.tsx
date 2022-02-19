@@ -1,5 +1,5 @@
 import firebaseApp from "../components/fire"
-import { getFirestore,collection, getDocs,query, orderBy, QuerySnapshot, where,Unsubscribe,onSnapshot } from "firebase/firestore";
+import { getFirestore,collection, query, orderBy, QuerySnapshot, onSnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth} from 'firebase/auth'
 import { useState,useEffect } from "react";
@@ -104,44 +104,24 @@ export default function Home(){
       const photoRef = collection(db, "photos");
       // 写真をアップロード日降順で取得(最新のが1番上に)
       const photoQuery = query(photoRef, orderBy("timeCreated","desc"));
-      getDocs(photoQuery)
-      .then(
+      // 更新をサブスクライブする
+      const unsubscribe = onSnapshot(
+        photoQuery,
         (snapshot)=>{
+          console.log("写真がアップデートされた")
           const {tmpImList,tasks}=genFetchUrlTasks(snapshot)
-
           // 全てのPromieseが終わったのを待ち、imListにsetする
           Promise.all(tasks).then(() => {
             setImlist(tmpImList)
-          })
-        },
-        (error)=>{
-          console.log(error)
-        }
-      )
+          })// end Promise
+        } // end Callback
+      ) // end onSnapshot
+      // useEffectのreturnに関数を渡すことで、
+      // unmount時に関数を実行するので、
+      // unmount時にlistenを止めるためにunsubscribeを返す
+      return unsubscribe
     }catch(error){
       console.log(error)
-    }
-
-  }
-
-  const postUpload=(fileName:string,afterDataAdded:()=>void)=>{
-    try{
-      // collectionへの参照を取得
-      const photoRef = collection(db, "photos");
-      const filePath=`photos/${fileName}`
-      const photoQuery = query(photoRef, where("filePath", "==", filePath));
-      const unsubscribe =onSnapshot(
-        photoQuery,
-        (querysnapShot)=>{
-          if(!querysnapShot.empty){
-            console.log("file found")
-            afterDataAdded()
-            unsubscribe()
-          }
-        }
-      )
-    }catch(error){
-      afterDataAdded()
     }
   }
 
@@ -149,7 +129,7 @@ export default function Home(){
     if (auth.currentUser == null){
       router.push('/login')
     }else{
-      fetchImage()
+      return fetchImage()
     }
   },[])
 
@@ -158,7 +138,7 @@ export default function Home(){
       <Layout header='Photo Sharing' title='Photo Sharing' href="/">
         <div className="container mt-2">
         <ImageList imlist={imList}/>
-        <UploadLayer fetchImage={fetchImage} postUpload={postUpload}/>
+        <UploadLayer/>
         </div>
       </Layout>
     </div>

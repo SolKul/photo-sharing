@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState} from 'react';
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 import Image from 'next/image'
 import loadImage,{LoadImageOptions }from 'blueimp-load-image';
@@ -11,7 +11,7 @@ const storage = getStorage(firebaseApp)
 const c = "abcdefghijklmnopqrstuvwxyz0123456789";
 const cl = c.length;
 
-export default function UploadLayer({fetchImage,postUpload}:any){
+export default function UploadLayer(){
   const [modalAppear, setModalAppear] = useState<boolean>(false)
   const [btnAppear, setBtnAppear] = useState<boolean>(true)
   const [uploading, setUploading] = useState<boolean>(false);
@@ -32,7 +32,6 @@ export default function UploadLayer({fetchImage,postUpload}:any){
   }
 
   const endUpload=(e:any)=>{
-    fetchImage()
     setUploading(false)
     setBtnAppear(true)
   }
@@ -43,7 +42,6 @@ export default function UploadLayer({fetchImage,postUpload}:any){
       closeModal={closeModal}
       startUpload={startUpload}
       endUpload={endUpload}
-      postUpload={postUpload} 
     />
     {
       btnAppear
@@ -61,8 +59,7 @@ const UploadModal=({
     modalAppear,
     closeModal,
     startUpload,
-    endUpload,
-    postUpload }: any) =>{
+    endUpload }: any) =>{
   const [imageUrl, setImageUrl] = useState<string>("")
   const [clickable, setClickable] = useState(false);
   const [fileName,setFileName]=useState<string>("")
@@ -143,16 +140,10 @@ const UploadModal=({
           //catches the errors
           console.log(err)
         }, () => {
-          postUpload(
-            randFileName,
-            ()=>{
-              clearState()
-              endUpload()
-            }
-          )
+            endUpload()
         }
-      )
-    }
+      )// end on
+    } //end else
   }
 
   const clearState=()=>{
