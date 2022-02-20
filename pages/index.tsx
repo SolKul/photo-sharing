@@ -31,8 +31,6 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
   // Promiseの配列
   const tasks: Array<Promise<string|void>> = [];
 
-  let count=0
-
   // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
   snapshot.forEach((document)=>{
     const doc=document.data()
@@ -47,10 +45,10 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
     }
   });
 
-  // 配列のmapではインデックス番号が取得できるので、
+  // 配列のforEachではインデックス番号が取得できるので、
   // 処理の順番が違っても順番通りにtmpImListに格納できる
   // そしてそれらのPromiseをtasksに格納
-  fileInfoList.map((fileInfo,index)=>{
+  fileInfoList.forEach((fileInfo,index)=>{
     tmpImList[index]={
       id:fileInfo.id,
       thumbUrl:"",
@@ -89,7 +87,7 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
     )
   })
 
-  return {tmpImList,tasks}
+  return Promise.all(tasks).then(()=>tmpImList)
 }
 
 export default function Home(){
@@ -108,10 +106,8 @@ export default function Home(){
       const unsubscribe = onSnapshot(
         photoQuery,
         (snapshot)=>{
-          console.log("写真がアップデートされた")
-          const {tmpImList,tasks}=genFetchUrlTasks(snapshot)
-          // 全てのPromieseが終わったのを待ち、imListにsetする
-          Promise.all(tasks).then(() => {
+          genFetchUrlTasks(snapshot)
+          .then((tmpImList) => {
             setImlist(tmpImList)
           })// end Promise
         } // end Callback

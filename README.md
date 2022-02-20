@@ -1,6 +1,17 @@
 # Photo Sharing Project
 
-写真を共有します
+- Firebase Cloud Functionを使った認証コードログイン
+- 更新があったら写真一覧更新
+- Promise.allで並列処理で写真一覧ダウンロード
+- インスタグラム風に写真一覧を表示
+- 写真プレビューモーダル
+- アップロードモーダル
+- 複数画像アップロード
+- アップロード前に画像をExifのorientationを反映しつつ圧縮
+- 画像の圧縮も並列処理
+- アップロード処理も並列処理
+- アップロード後、Cloud Functionで圧縮し、サムネイル用画像を生成し、Firestoreに画像情報登録
+
 
 # todo
 
@@ -26,7 +37,7 @@
 + [x] アップロードローディングをバックグラウンドに
 + [x] アップデート終了をポーリングではなく`onSnapshot`に
 + [x] `onSnapshot`で写真更新
-+ [ ] 複数画像アップロード
++ [x] 複数画像アップロード
 + [ ] 写真プレビューページを複数ページに→
 https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_query
 + [ ] グループ紹介ページ
@@ -120,3 +131,10 @@ https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_q
     - アップロード開始時処理
     - アップロード終了時処理
 
+## アップロード
+
+`uploadTask`
+
+
+https://firebase.google.com/docs/storage/web/upload-files?hl=ja#monitor_upload_progress  
+このドキュメントだけ呼んだだけだと分かりにくいが、uploadTask.onの第1引数に'state_changed'を指定すると、第2、第3、第4引数に渡した関数でアップロード状況を管理することができる。

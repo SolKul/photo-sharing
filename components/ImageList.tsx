@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 import Image from 'next/image'
 
@@ -78,7 +78,13 @@ export const ImageList = ({ imlist }: ImageListProps) => {
   </div>
 }
 
-const PreviewModal=({show,setShow,modalUrl}:any)=>{
+export type PreviewModalProps = {
+  show: boolean
+  setShow: React.Dispatch<SetStateAction<boolean>>
+  modalUrl:string
+}
+
+const PreviewModal=({show,setShow,modalUrl}:PreviewModalProps)=>{
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const closeModal = () => {
@@ -89,7 +95,7 @@ const PreviewModal=({show,setShow,modalUrl}:any)=>{
   if (show) {
     return <div className={styles.modalOverlay} onClick={closeModal}>
       <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
-      <div className={`col-11 col-lg-5 ${styles.white}`} onClick={(e:any) => e.stopPropagation()}>  
+      <div className={`col-11 col-lg-5 ${styles.white}`} onClick={(e:React.MouseEvent<HTMLElement>) => e.stopPropagation()}>  
         {
           modalUrl!=""
             &&
