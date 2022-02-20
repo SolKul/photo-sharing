@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useState,useEffect } from "react";
+import React, { useState,useEffect } from "react";
 
 import firebaseApp from "../components/fire"
 import { getAuth,signInAnonymously,Auth} from 'firebase/auth'
@@ -52,7 +52,7 @@ export default function Home(){
 
   /**コードを入力したらその値をcodeに保持する処理
    */
-  const doChangeCode=(e:any)=>{
+  const doChangeCode=(e:React.ChangeEvent<HTMLInputElement>)=>{
     const inputCode=e.target.value
     if (inputCode.length<5){
       setCode(e.target.value)
