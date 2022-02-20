@@ -1,7 +1,7 @@
 import firebaseApp from "../components/fire"
 import { getFirestore,collection, query, orderBy, QuerySnapshot, onSnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
-import {getAuth} from 'firebase/auth'
+import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import { useState,useEffect } from "react";
 
 import Layout from '../components/Layout'
@@ -122,11 +122,13 @@ export default function Home(){
   }
 
   useEffect(()=>{
-    if (auth.currentUser == null){
-      router.push('/login')
-    }else{
-      return fetchImage()
-    }
+    return onAuthStateChanged(auth,(user)=>{    
+      if (user == null){
+        router.push('/login')
+      }else{
+        return fetchImage()
+      }// end else
+    })//end onAuthState
   },[])
 
   return (
