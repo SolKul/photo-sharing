@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import React, { useState,useEffect } from "react";
 
 import firebaseApp from "../components/fire"
-import { getAuth,signInAnonymously,Auth} from 'firebase/auth'
+import { getAuth,signInAnonymously,Auth,onAuthStateChanged} from 'firebase/auth'
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 import Layout from '../components/Layout'
@@ -41,13 +41,16 @@ export default function Home(){
 
   // アクセス時に匿名認証
   useEffect(()=>{
-    if (auth.currentUser == null){
-      signInAnonymously(auth).then(()=>{
-        console.log("logined: ",auth.currentUser && auth.currentUser.uid)
-      })
-    }else{
-      console.log('already logined: ',auth.currentUser.uid)
-    } 
+    return onAuthStateChanged(auth,(user)=>{    
+      if (user == null){
+        signInAnonymously(auth)
+        .then(()=>{
+          console.log("logined: ",auth.currentUser && auth.currentUser.uid)
+        })
+      }else{
+        console.log('already logined: ',user.uid)
+      }// end else
+    })//end onAuthStat
   },[])
 
   /**コードを入力したらその値をcodeに保持する処理
