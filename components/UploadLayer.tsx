@@ -310,7 +310,7 @@ const ImageSection=({imgStatus,bImgArray}:ImageSectionProps)=>{
 
 const UploadBtn=({openModal}:{openModal:()=>void})=>{
   return <div className={`btn ${styles.fixed_btn}`} onClick={openModal}>
-  <img className={styles.plus_circular_btn} src="./plus-circular-button.svg"></img>
+  <img className={styles.plus_circular_btn} src="./upload_plus.svg"></img>
 </div>;
 }
 
