@@ -92,6 +92,7 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 
 export default function Home(){
   const [imList, setImlist] = useState<ImageInfo[]>([])
+  const [authLoading,setAuthLoading]=useState<boolean>(true)
   const router=useRouter()
 
   const fetchImage=()=>{
@@ -109,6 +110,7 @@ export default function Home(){
           genFetchUrlTasks(snapshot)
           .then((tmpImList) => {
             setImlist(tmpImList)
+            setAuthLoading(false)
           })// end Promise
         } // end Callback
       ) // end onSnapshot
@@ -135,8 +137,23 @@ export default function Home(){
     <div>
       <Layout header='Photo Sharing' title='Photo Sharing' href="/">
         <div className="container mt-2">
-        <ImageList imlist={imList}/>
-        <UploadLayer/>
+          {
+            authLoading
+              ?
+            <div>
+              <div className={styles.adjust_hegit} />
+              <div className={`d-flex justify-content-center`}>
+                <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            </div>
+              :
+            <div>
+            <ImageList imlist={imList}/>
+            <UploadLayer/>
+            </div>
+          }
         </div>
       </Layout>
     </div>

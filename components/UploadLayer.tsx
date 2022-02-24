@@ -273,6 +273,7 @@ const ImageSection=({imgStatus,bImgArray}:ImageSectionProps)=>{
   const multiImages=bImgArray.map((bImgO:blobedImageObject)=>
     <div className={`${gridCol}`} key={bImgO.fileName}>
       <div>
+      {/* upload_preview　が 70:100なので、210:300とする */}
       <Image 
         src={bImgO.imageUrl}
         height="210" 
@@ -301,8 +302,7 @@ const ImageSection=({imgStatus,bImgArray}:ImageSectionProps)=>{
       </div>
     </div>
   }else{
-    return <div className={`row g-1`}>
-      {/* upload_preview　が 70:100なので、210:300とする */}
+    return <div className={`row g-1 align-items-center ${styles.full}`}>
       {multiImages}
     </div>
   }
