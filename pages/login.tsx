@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
-import { useState,useEffect } from "react";
+import React, { useState,useEffect } from "react";
 
 import firebaseApp from "../components/fire"
-import { getAuth,signInAnonymously,Auth} from 'firebase/auth'
+import { getAuth,signInAnonymously,Auth,onAuthStateChanged} from 'firebase/auth'
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 import Layout from '../components/Layout'
@@ -41,18 +41,21 @@ export default function Home(){
 
   // アクセス時に匿名認証
   useEffect(()=>{
-    if (auth.currentUser == null){
-      signInAnonymously(auth).then(()=>{
-        console.log("logined: ",auth.currentUser && auth.currentUser.uid)
-      })
-    }else{
-      console.log('already logined: ',auth.currentUser.uid)
-    } 
+    return onAuthStateChanged(auth,(user)=>{    
+      if (user == null){
+        signInAnonymously(auth)
+        .then(()=>{
+          console.log("logined: ",auth.currentUser && auth.currentUser.uid)
+        })
+      }else{
+        console.log('already logined: ',user.uid)
+      }// end else
+    })//end onAuthStat
   },[])
 
   /**コードを入力したらその値をcodeに保持する処理
    */
-  const doChangeCode=(e:any)=>{
+  const doChangeCode=(e:React.ChangeEvent<HTMLInputElement>)=>{
     const inputCode=e.target.value
     if (inputCode.length<5){
       setCode(e.target.value)
@@ -73,7 +76,7 @@ export default function Home(){
           console.log(result)
           setMessage("認証しました")
           user.getIdToken(true).then(()=>{
-            router.push("/newlist")
+            router.push("/")
           })
         },
         (error)=>{
@@ -106,7 +109,7 @@ export default function Home(){
         {/* <div className="form-text text-start col-11">認証コードは4桁です</div>
         <div></div> */}
         <div className="col-11 col-md-6">
-          <input className="form-control form-control-lg" type="number" id="code" onChange={doChangeCode} value={code} ></input>
+          <input className="form-control form-control-lg" type="number" id="code" onChange={doChangeCode} value={code} autoComplete="off" ></input>
         </div>
         <div></div>
         <input type="submit" className="col-11 col-md-6 btn btn-primary" onClick={doLogin} value="ログイン" />

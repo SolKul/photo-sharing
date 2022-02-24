@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 import Image from 'next/image'
 
@@ -8,6 +8,7 @@ export type ImageInfo = {
   id: string
   thumbUrl: string
   previewUrl:string
+  valid:boolean
 }
 
 type ImageListProps = {
@@ -49,21 +50,24 @@ export const ImageList = ({ imlist }: ImageListProps) => {
   }
 
   // imlistからitemを取り出し、item.idとitem.urlを組み込んで
-  // li要素配列を生成する。
-  const listItems = imlist.map((item: ImageInfo) =>
-    <div key={item.id} className="col-4 col-lg-3">
-      <div onClick={()=>openModal(item.previewUrl)}>
-        <Image 
-          src={item.thumbUrl} 
-          height="300" 
-          width="300"
-          objectFit="contain" 
-          layout="responsive"
-          alt="" 
-        />
+  // 配列を生成する。
+  const listItems = imlist.map((item: ImageInfo) =>{
+    if (item.valid){
+      return <div key={item.id} className="col-4 col-lg-3">
+        <div onClick={()=>openModal(item.previewUrl)}>
+          <Image 
+            src={item.thumbUrl} 
+            height="300" 
+            width="300"
+            objectFit="contain" 
+            layout="responsive"
+            alt="" 
+            unoptimized={true}
+          />
+        </div>
       </div>
-    </div>
-  );
+    }
+  });
 
   return <div>
     <div className={`row g-0 ${styles.square}`}>
@@ -74,7 +78,13 @@ export const ImageList = ({ imlist }: ImageListProps) => {
   </div>
 }
 
-const PreviewModal=({show,setShow,modalUrl}:any)=>{
+export type PreviewModalProps = {
+  show: boolean
+  setShow: React.Dispatch<SetStateAction<boolean>>
+  modalUrl:string
+}
+
+const PreviewModal=({show,setShow,modalUrl}:PreviewModalProps)=>{
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const closeModal = () => {
@@ -85,7 +95,7 @@ const PreviewModal=({show,setShow,modalUrl}:any)=>{
   if (show) {
     return <div className={styles.modalOverlay} onClick={closeModal}>
       <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
-      <div className={`col-11 col-lg-5 ${styles.white}`} onClick={(e:any) => e.stopPropagation()}>  
+      <div className={`col-11 col-lg-5 ${styles.white}`} onClick={(e:React.MouseEvent<HTMLElement>) => e.stopPropagation()}>  
         {
           modalUrl!=""
             &&
@@ -97,6 +107,7 @@ const PreviewModal=({show,setShow,modalUrl}:any)=>{
               objectFit="contain" 
               layout="responsive"
               alt="" 
+              unoptimized={true}
               onLoadingComplete={(e)=>{setIsLoading(false)}}
             />
           </div>

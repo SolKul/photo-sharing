@@ -15,8 +15,8 @@
       position: absolute; // 浮かせる
       width: 90%; // 親要素の90%
       height: 90%; // 親要素の90%
-      top: 0%;
-      left: 0%;
+      top: 5%;
+      left: 5%;
     }
   }
 }
@@ -65,14 +65,22 @@
   }
 }
 
-.fixed_btn
-{
+.fixed_btn{
   position: fixed;
   bottom: 10px; 
   right: 10px;
   // font-size: 3rem;
   // width: 3rem;
   // height: 3rem;
+}
+
+.fixed_upload_status{
+  position: fixed;
+  bottom: 0px; 
+  width: 100%;
+  &>div{
+    background-color: rgba(0,0,0,0.5);
+  }
 }
 
 .plus_circular_btn{
@@ -95,4 +103,12 @@
 .upload_preview{
   height: 70%;
   width: 100%;
+}
+
+.full{
+  height: 100%;
+}
+
+.adjust_hegit{
+  height: 10rem;
 }
