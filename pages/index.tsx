@@ -120,6 +120,7 @@ export default function Home(){
       return unsubscribe
     }catch(error){
       console.log(error)
+      router.push('/login')
     }
   }
 
