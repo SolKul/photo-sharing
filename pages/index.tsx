@@ -112,6 +112,10 @@ export default function Home(){
             setImlist(tmpImList)
             setAuthLoading(false)
           })// end Promise
+        },
+        (error)=>{
+          console.log(error)
+          router.push('/login')
         } // end Callback
       ) // end onSnapshot
       // useEffectのreturnに関数を渡すことで、
