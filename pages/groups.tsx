@@ -31,7 +31,8 @@ type GroupImInfo={
 }
 
 const groupDir="groups/"
-const introGroups=["test_group","test_group2"]
+const groomGroups=["test_group","test_group2"]
+const brideGroups=["test_group","test_group2"]
 
 export default function Home(){
   const [gInfoList,setGInfoList]=useState<any>()
@@ -45,21 +46,35 @@ export default function Home(){
       snapshot.forEach((document)=>{
         const doc=document.data()
         tmpGroupInfo[doc.dirName]={
-          explanation:doc.explanation,
-          table:doc.table
+          table:doc.table,
+          relation:doc.relation,
+          explanation:doc.explanation
         }
       })
       setGInfoList(tmpGroupInfo)
     })
   }
   
-  const groupIntros=introGroups.map((item:any)=>{
+  const groomGroupIntros=groomGroups.map((item:any)=>{
     if (gInfoList && (item in gInfoList)){
       return <GroupIntroduction 
         key={item}
         dirName={item} 
-        explanation={gInfoList[item].explanation} 
         table={gInfoList[item].table} 
+        relation={gInfoList[item].relation}
+        explanation={gInfoList[item].explanation} 
+      />
+    }
+  })
+
+  const brideGroupIntros=brideGroups.map((item:any)=>{
+    if (gInfoList && (item in gInfoList)){
+      return <GroupIntroduction 
+        key={item}
+        dirName={item} 
+        table={gInfoList[item].table} 
+        relation={gInfoList[item].relation}
+        explanation={gInfoList[item].explanation}  
       />
     }
   })
@@ -76,11 +91,24 @@ export default function Home(){
 
   return <div>
     <Layout header='Photo Sharing' title='Photo Sharing' href="/">
-      グループ紹介ページ
+      <h2 className="my-3">グループ紹介ページ</h2>
+      <h4 className="my-1">テーブルレイアウト</h4>
+      <Image 
+        src="/tableLayout.png"
+        height="300" 
+        width="500"
+        objectFit="contain"
+        layout="responsive"
+        alt="" 
+        unoptimized={true}
+      />
     {/* <div className={`row g-0 align-items-center justify-content-center`}> */}
     {/* <div className={`col-11 col-lg-5 slideContent`} >   */}
     {/* <div> */}
-      {groupIntros}
+      <h3 className="my-3">新郎グループ</h3>
+      {groomGroupIntros}
+      <h3 className="my-3">新婦グループ</h3>
+      {brideGroupIntros}
     {/* </div> */}
     {/* </div> */}
     {/* </div>  */}
@@ -88,13 +116,13 @@ export default function Home(){
   </div>
 }
 
-const GroupIntroduction=({dirName,explanation,table}:any)=>{
+const GroupIntroduction=({dirName,table,relation,explanation}:any)=>{
   const [imList, setImList] = useState<GroupImInfo[]>([])
 
   // dirName以下の画像をlistAllで取得する
   const fetchImage=async (dirName:string)=>{
     console.log("start fetch images")
-    // collection()が失敗するかもしれないのでtry~catchで囲む
+    // ref()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
       const groupRef = ref(storage, `${groupDir}${dirName}`);
@@ -173,7 +201,8 @@ const GroupIntroduction=({dirName,explanation,table}:any)=>{
         left: 5%;
       }
     `}</style>
-    テーブル: {table}
+    <h4 className="my-2">{relation} </h4>
+    <h5>テーブル: {table}</h5>
     <Swiper
       modules={[Navigation,Pagination,Lazy]}
       slidesPerView={1} //一度に表示するスライドの数
@@ -186,6 +215,6 @@ const GroupIntroduction=({dirName,explanation,table}:any)=>{
     >
       {slideList}
     </Swiper>
-    {explanation}
+    <h6 className="m-2">{explanation}</h6>
     </div>
 }
