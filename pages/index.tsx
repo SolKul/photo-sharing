@@ -160,7 +160,29 @@ export default function Home(){
             </div>
           }
         </div>
+      <PhotoBtn/>
       </Layout>
     </div>
   )
+}
+
+const PhotoBtn=()=>{
+  const router = useRouter()
+
+  return <div className="btn" onClick={()=>{router.push("/groups")}}>
+    <style jsx>{`
+      .btn{
+        z-index:1;
+        position: fixed;
+        bottom: 5rem; 
+        right: 1rem;
+      }
+      
+      .circleBtn{
+        width: 3rem;
+        height: 3rem;
+      }
+    `}</style>
+    <img className="circleBtn" src="./group_introduce.svg"></img>
+  </div>
 }

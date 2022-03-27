@@ -91,7 +91,9 @@ export default function Home(){
 
   return <div>
     <Layout header='Photo Sharing' title='Photo Sharing' href="/">
-      <h2 className="my-3">グループ紹介ページ</h2>
+    <div className={`row g-0 align-items-center justify-content-center`}>
+    <div className={`col-11 col-lg-5 slideContent`} >  
+    <h2 className="my-3">グループ紹介ページ</h2>
       <h4 className="my-1">テーブルレイアウト</h4>
       <Image 
         src="/tableLayout.png"
@@ -102,16 +104,15 @@ export default function Home(){
         alt="" 
         unoptimized={true}
       />
-    {/* <div className={`row g-0 align-items-center justify-content-center`}> */}
-    {/* <div className={`col-11 col-lg-5 slideContent`} >   */}
     {/* <div> */}
       <h3 className="my-3">新郎グループ</h3>
       {groomGroupIntros}
       <h3 className="my-3">新婦グループ</h3>
       {brideGroupIntros}
     {/* </div> */}
-    {/* </div> */}
-    {/* </div>  */}
+    </div>
+    </div> 
+    <PhotoBtn />
     </Layout>
   </div>
 }
@@ -181,25 +182,6 @@ const GroupIntroduction=({dirName,table,relation,explanation}:any)=>{
         border: solid #000 2px;
         height:100 
       }
-      .slideContent{
-        position: relative;
-      }
-
-      .slideContent::before{
-        content: "";
-        display: block;
-        padding-top: 100%;
-        width: 100%;
-      }
-
-      .slideContent>div{
-        border: solid #000 2px;
-        position: absolute; // 浮かせる
-        width: 90%; // 親要素の90%
-        height: 90%; // 親要素の90%
-        top: 5%;
-        left: 5%;
-      }
     `}</style>
     <h4 className="my-2">{relation} </h4>
     <h5>テーブル: {table}</h5>
@@ -217,4 +199,25 @@ const GroupIntroduction=({dirName,table,relation,explanation}:any)=>{
     </Swiper>
     <h6 className="m-2">{explanation}</h6>
     </div>
+}
+
+const PhotoBtn=()=>{
+  const router = useRouter()
+
+  return <div className="btn" onClick={()=>{router.push("/")}}>
+    <style jsx>{`
+      .btn{
+        z-index:1;
+        position: fixed;
+        bottom: 1rem; 
+        right: 1rem;
+      }
+
+      .circleBtn{
+        width: 3rem;
+        height: 3rem;
+      }
+    `}</style>
+    <img className="circleBtn" src="./photo.svg"></img>
+  </div>
 }
