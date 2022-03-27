@@ -30,13 +30,21 @@ type GroupImInfo={
   url:string
 }
 
+type GroupInfo={
+  [key:string]:{
+    table:string
+    relation:string
+    explanation:string
+  }
+}
+
 const tableLayoutImage="groups/tableLayout.png"
 const groupDir="groups/"
 const groomGroups=["test_group","test_group2"]
 const brideGroups=["test_group","test_group2"]
 
 export default function Home(){
-  const [gInfoList,setGInfoList]=useState<any>()
+  const [gInfoList,setGInfoList]=useState<GroupInfo>()
   const [authLoading,setAuthLoading]=useState<boolean>(true)
   const [tableLOUrl,setTableLOUrl]=useState<string>("")
   const router=useRouter()
@@ -50,7 +58,7 @@ export default function Home(){
 
   const fetchGroupInfo=()=>{
     const GroupInfoQuery= query(collection(db, "groups")) 
-    const tmpGroupInfo:any={}
+    const tmpGroupInfo:GroupInfo={}
     getDocs(GroupInfoQuery).then((snapshot:QuerySnapshot)=>{
       snapshot.forEach((document)=>{
         const doc=document.data()
@@ -64,7 +72,7 @@ export default function Home(){
     })
   }
   
-  const groomGroupIntros=groomGroups.map((item:any)=>{
+  const groomGroupIntros=groomGroups.map((item)=>{
     if (gInfoList && (item in gInfoList)){
       return <GroupIntroduction 
         key={item}
@@ -76,7 +84,7 @@ export default function Home(){
     }
   })
 
-  const brideGroupIntros=brideGroups.map((item:any)=>{
+  const brideGroupIntros=brideGroups.map((item)=>{
     if (gInfoList && (item in gInfoList)){
       return <GroupIntroduction 
         key={item}
@@ -129,7 +137,14 @@ export default function Home(){
   </div>
 }
 
-const GroupIntroduction=({dirName,table,relation,explanation}:any)=>{
+type GroupIntroductionProps={
+  dirName:string
+  table:string
+  relation:string
+  explanation:string
+}
+
+const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionProps)=>{
   const [imList, setImList] = useState<GroupImInfo[]>([])
 
   // dirName以下の画像をlistAllで取得する
@@ -140,20 +155,24 @@ const GroupIntroduction=({dirName,table,relation,explanation}:any)=>{
       // collectionへの参照を取得
       const groupRef = ref(storage, `${groupDir}${dirName}`);
       const res=await listAll(groupRef)      
-      const tasks: any[] = [];
-      const tmpImList:any[]=[]
+      const tasks: Array<Promise<string|void>> = [];
+      const tmpImList:GroupImInfo[]=[]
 
-      res.items.forEach((itemRef: any) => {
+      let count = 0;
+
+      res.items.forEach((itemRef) => {
         // 画像URLを取得、保存するPromiseを生成し、
         // そのPromiseをひとまとまりにする。
         tasks.push(getDownloadURL(itemRef)
           .then((fireBaseUrl: string) => {
             tmpImList.push(
               {
-                id: itemRef,
+                id: String(count),
                 url: fireBaseUrl
               }
             )
+            console.log(`count: ${count}`)
+            count++;
           })
         )
       })
