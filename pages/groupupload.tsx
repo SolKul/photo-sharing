@@ -9,7 +9,7 @@ const auth = getAuth(firebaseApp);
 import Image from 'next/image'
 import loadImage,{LoadImageOptions }from 'blueimp-load-image';
 
-import React, { useState,useEffect} from 'react';
+import React, { useState,useEffect,useRef} from 'react';
 import { useRouter } from "next/dist/client/router";
 
 type blobedImageObject={
@@ -28,6 +28,7 @@ export default function Home(){
   // 2:アップロード準備完了
   const [imgStatus,setImgStatus]=useState<number>(0)
   const router = useRouter()
+  const fileRef=useRef<HTMLInputElement>(null)
   
   // Eventの型は一回間違えてからエラーが出たところに
   // VSCode上でオーバーレイしてヒントを出すとわかる。
@@ -126,6 +127,7 @@ export default function Home(){
     }) //end forEach
     Promise.all(uploadTasks).then(()=>{
       clearState()
+      if(fileRef.current)fileRef.current.value=""
     })
   }
 
@@ -165,6 +167,7 @@ export default function Home(){
         accept='image/*'
         onChange={handleFileChange}
         multiple
+        ref={fileRef}
       />
       <button disabled={imgStatus!=2} className="btn btn-primary">アップロード</button>
     </form>
