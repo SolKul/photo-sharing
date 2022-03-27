@@ -109,7 +109,7 @@ export default function Home(){
           genFetchUrlTasks(snapshot)
           .then((tmpImList) => {
             setImlist(tmpImList)
-            setAuthLoading(true)
+            setAuthLoading(false)
           })// end Promise
         },
         (error)=>{
@@ -145,7 +145,7 @@ export default function Home(){
             authLoading
               ?
             <div>
-            <div style={{height: "10 rem"}} />
+            <div style={{height: "10rem"}} />
             <div className={`d-flex justify-content-center`}>
               <div className="spinner-border" role="status">
               <span className="visually-hidden">Loading...</span>
