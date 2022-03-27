@@ -233,6 +233,11 @@ const UploadSection = ({
     bImgArray}:UploadSectionProps)=>{
 
   return  <div className="p-3">
+    <style jsx>{`
+      .btn-midori{
+        background-color:#87b960;
+      }
+    `}</style>
     <div className={styles.upload_form}>
       <form className="form-group" onSubmit={handleFireBaseUpload}>
         <input className="form-control-file mb-1"
@@ -242,7 +247,7 @@ const UploadSection = ({
           onChange={handleFileChange}
           multiple
         />
-        <button disabled={imgStatus!=2} className="btn btn-primary">アップロード</button>
+        <button disabled={imgStatus!=2} className="btn btn-midori text-white">アップロード</button>
       </form>
     </div>
     <div className={styles.upload_preview}>

@@ -140,7 +140,7 @@ export default function Home(){
 
   return (
     <div>
-      <Layout header='Photo Sharing' title='Photo Sharing' href="/">
+      <Layout header='T&amp;M Wedding' title='T&amp;M Wedding' href="/">
         <div className="container mt-2">
           {
             authLoading
@@ -183,6 +183,6 @@ const PhotoBtn=()=>{
         height: 3rem;
       }
     `}</style>
-    <img className="circleBtn" src="./group_introduce.svg"></img>
+    <img className="circleBtn" src="./guests.svg"></img>
   </div>
 }

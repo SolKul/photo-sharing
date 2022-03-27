@@ -90,10 +90,10 @@ export default function Home(){
   },[])
 
   return <div>
-    <Layout header='Photo Sharing' title='Photo Sharing' href="/">
+    <Layout header='T&amp;M Wedding' title='T&amp;M Wedding' href="/">
     <div className={`row g-0 align-items-center justify-content-center`}>
     <div className={`col-11 col-lg-5 slideContent`} >  
-    <h2 className="my-3">グループ紹介ページ</h2>
+    <h2 className="my-3">ゲスト紹介</h2>
       <h4 className="my-1">テーブルレイアウト</h4>
       <Image 
         src="/tableLayout.png"
@@ -105,9 +105,9 @@ export default function Home(){
         unoptimized={true}
       />
     {/* <div> */}
-      <h3 className="my-3">新郎グループ</h3>
+      <h3 className="my-3">新郎ゲスト</h3>
       {groomGroupIntros}
-      <h3 className="my-3">新婦グループ</h3>
+      <h3 className="my-3">新婦ゲスト</h3>
       {brideGroupIntros}
     {/* </div> */}
     </div>
