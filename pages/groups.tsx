@@ -1,13 +1,13 @@
 // firebase関係
 import firebaseApp from "../components/fire"
 import { getFirestore,collection, query, QuerySnapshot, getDocs } from "firebase/firestore";
-import { getStorage, ref,listAll, getDownloadURL } from 'firebase/storage'
+import { getStorage, ref,listAll, getDownloadURL,StorageReference } from 'firebase/storage'
 import {getAuth, onAuthStateChanged} from 'firebase/auth'
 
 import { useState,useEffect } from "react";
 import { useRouter } from "next/dist/client/router";
 
-import { Swiper, SwiperSlide } from 'swiper/react' //カルーセル用のタグをインポート
+import { Swiper, SwiperSlide, useSwiper } from 'swiper/react' //カルーセル用のタグをインポート
 import { Pagination, Navigation,Lazy} from 'swiper' //使いたい機能をインポート
 
 
@@ -40,7 +40,7 @@ type GroupInfo={
 
 const tableLayoutImage="groups/tableLayout.png"
 const groupDir="groups/"
-const groomGroups=["test_group","test_group2"]
+const groomGroups=["daikin","seattle","robot"]
 const brideGroups=["test_group","test_group2"]
 
 export default function Home(){
@@ -157,20 +157,25 @@ const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionP
       const tasks: Array<Promise<string|void>> = [];
       const tmpImList:GroupImInfo[]=[]
 
-      let count = 0;
+      const itemList:StorageReference[]=[]
 
       res.items.forEach((itemRef) => {
+        itemList.push(itemRef)
+      })
+
+      // ファイル名でソート
+      const sortList=itemList
+      .sort((a,b)=>(a.name<b.name) ? -1 : 1)
+
+      sortList.map((itemRef,index)=>{
         // 画像URLを取得、保存するPromiseを生成し、
         // そのPromiseをひとまとまりにする。
         tasks.push(getDownloadURL(itemRef)
           .then((fireBaseUrl: string) => {
-            tmpImList.push(
-              {
-                id: String(count),
-                url: fireBaseUrl
-              }
-            )
-            count++;
+            tmpImList[index]={
+              id: itemRef.name,
+              url: fireBaseUrl
+            }
           })
         )
       })
@@ -222,6 +227,7 @@ const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionP
       navigation //スライドを前後させるためのボタン、スライドの左右にある
       loop={true}
       lazy={true}
+      initialSlide={1}
     >
       {slideList}
     </Swiper>
