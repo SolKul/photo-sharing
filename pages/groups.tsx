@@ -30,6 +30,7 @@ type GroupImInfo={
   url:string
 }
 
+const tableLayoutImage="groups/tableLayout.png"
 const groupDir="groups/"
 const groomGroups=["test_group","test_group2"]
 const brideGroups=["test_group","test_group2"]
@@ -37,7 +38,15 @@ const brideGroups=["test_group","test_group2"]
 export default function Home(){
   const [gInfoList,setGInfoList]=useState<any>()
   const [authLoading,setAuthLoading]=useState<boolean>(true)
+  const [tableLOUrl,setTableLOUrl]=useState<string>("")
   const router=useRouter()
+
+  const fetchTableLOImage=()=>{
+    getDownloadURL( ref(storage, tableLayoutImage))
+      .then((url)=>{
+        setTableLOUrl(url)
+    })
+  }
 
   const fetchGroupInfo=()=>{
     const GroupInfoQuery= query(collection(db, "groups")) 
@@ -84,6 +93,7 @@ export default function Home(){
       if (user == null){
         router.push('/login')
       }else{
+        fetchTableLOImage()
         fetchGroupInfo()
       }// end else
     })//end onAuthState
@@ -95,21 +105,23 @@ export default function Home(){
     <div className={`col-11 col-lg-5 slideContent`} >  
     <h2 className="my-3">ゲスト紹介</h2>
       <h4 className="my-1">テーブルレイアウト</h4>
-      <Image 
-        src="/tableLayout.png"
-        height="300" 
-        width="500"
-        objectFit="contain"
-        layout="responsive"
-        alt="" 
-        unoptimized={true}
-      />
-    {/* <div> */}
-      <h3 className="my-3">新郎ゲスト</h3>
-      {groomGroupIntros}
-      <h3 className="my-3">新婦ゲスト</h3>
-      {brideGroupIntros}
-    {/* </div> */}
+      {
+        tableLOUrl
+          &&
+        <Image 
+          src={tableLOUrl}
+          height="300" 
+          width="500"
+          objectFit="contain"
+          layout="responsive"
+          alt="" 
+          unoptimized={true}
+        />
+      }
+    <h3 className="my-3">新郎ゲスト</h3>
+    {groomGroupIntros}
+    <h3 className="my-3">新婦ゲスト</h3>
+    {brideGroupIntros}
     </div>
     </div> 
     <PhotoBtn />
