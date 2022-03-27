@@ -34,7 +34,7 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
   // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
   snapshot.forEach((document)=>{
     const doc=document.data()
-    if (doc.thumbFilePath && doc.filePath){
+    if (doc.thumbFilePath && doc.filePath && doc.visibility){
       fileInfoList.push(
         {
           thumbFilePath:doc.thumbFilePath,
@@ -96,7 +96,6 @@ export default function Home(){
   const router=useRouter()
 
   const fetchImage=()=>{
-    console.log("start fetch images")
     // collection()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
@@ -146,11 +145,11 @@ export default function Home(){
             authLoading
               ?
             <div>
-              <div className={styles.adjust_hegit} />
-              <div className={`d-flex justify-content-center`}>
-                <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading...</span>
-                </div>
+            <div style={{height: "10rem"}} />
+            <div className={`d-flex justify-content-center`}>
+              <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+              </div>
             </div>
             </div>
               :
@@ -160,13 +159,13 @@ export default function Home(){
             </div>
           }
         </div>
-      <PhotoBtn/>
+      <GuestBtn/>
       </Layout>
     </div>
   )
 }
 
-const PhotoBtn=()=>{
+const GuestBtn=()=>{
   const router = useRouter()
 
   return <div className="btn" onClick={()=>{router.push("/groups")}}>

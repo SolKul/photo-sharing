@@ -1,8 +1,10 @@
-import { SetStateAction, useEffect, useState } from "react";
+import { useState } from "react";
 
 import Image from 'next/image'
 
 import styles from '../styles/Home.module.scss'
+
+import {PreviewModal,idAndUrl} from "./PreviewModal"
 
 export type ImageInfo = {
   id: string
@@ -39,13 +41,16 @@ export const ImageIdList = ({ imlist }: ImageListProps) => {
 // li要素を生成し、instagram風に並べるコンポーネント
 export const ImageList = ({ imlist }: ImageListProps) => {
   const [show, setShow] = useState<boolean>(false)
-  const [modalUrl, setModalUrl] = useState<string>("")
+  const [idAndUrl, setIdAndUrl] = useState<idAndUrl>({id:"",url:""})
 
   // imlistプロパティの要素数が 0 であれば何も描画しない
   if (imlist.length == 0) return null;
 
-  const openModal =(previewUrl:string)=>{
-    setModalUrl(previewUrl)
+  const openModal =(id:string,previewUrl:string)=>{
+    setIdAndUrl({
+      id:id,
+      url:previewUrl
+    })
     setShow(true)
   }
 
@@ -54,7 +59,7 @@ export const ImageList = ({ imlist }: ImageListProps) => {
   const listItems = imlist.map((item: ImageInfo) =>{
     if (item.valid){
       return <div key={item.id} className="col-4 col-lg-3">
-        <div onClick={()=>openModal(item.previewUrl)}>
+        <div onClick={()=>openModal(item.id,item.previewUrl)}>
           <Image 
             src={item.thumbUrl} 
             height="300" 
@@ -74,59 +79,6 @@ export const ImageList = ({ imlist }: ImageListProps) => {
       {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
       {listItems}
     </div>
-    <PreviewModal show={show} setShow={setShow} modalUrl={modalUrl}/>
+    <PreviewModal show={show} setShow={setShow} idAndUrl={idAndUrl}/>
   </div>
-}
-
-export type PreviewModalProps = {
-  show: boolean
-  setShow: React.Dispatch<SetStateAction<boolean>>
-  modalUrl:string
-}
-
-const PreviewModal=({show,setShow,modalUrl}:PreviewModalProps)=>{
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const closeModal = () => {
-    setIsLoading(true)
-    setShow(false)
-  }
-
-  if (show) {
-    return <div className={styles.modalOverlay} onClick={closeModal}>
-      <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
-      <div className={`col-11 col-lg-5 ${styles.white}`} onClick={(e:React.MouseEvent<HTMLElement>) => e.stopPropagation()}>  
-        {
-          modalUrl!=""
-            &&
-          <div>
-            <Image 
-              src={modalUrl} 
-              width={500}
-              height={500}
-              objectFit="contain" 
-              layout="responsive"
-              alt="" 
-              unoptimized={true}
-              onLoadingComplete={(e)=>{setIsLoading(false)}}
-            />
-          </div>
-        }
-        {/* ロード中は以下を表示しておく */}
-        {
-          isLoading
-            &&
-          <div className={`d-flex justify-content-center align-items-center`}>
-            {/* 高さを親要素の100%とすることで、上下中央寄せができる */}
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          </div>
-        } 
-      </div>
-      </div>
-    </div>
-  } else {
-    return null;
-  }
 }

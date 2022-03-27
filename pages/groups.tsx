@@ -149,10 +149,9 @@ const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionP
 
   // dirName以下の画像をlistAllで取得する
   const fetchImage=async (dirName:string)=>{
-    console.log("start fetch images")
     // ref()が失敗するかもしれないのでtry~catchで囲む
     try{
-      // collectionへの参照を取得
+      // groups/dirNameへの参照を取得
       const groupRef = ref(storage, `${groupDir}${dirName}`);
       const res=await listAll(groupRef)      
       const tasks: Array<Promise<string|void>> = [];
@@ -171,7 +170,6 @@ const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionP
                 url: fireBaseUrl
               }
             )
-            console.log(`count: ${count}`)
             count++;
           })
         )
@@ -211,7 +209,6 @@ const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionP
     <style jsx>{`
       .testClasss{
         border: solid #000 2px;
-        height:100 
       }
     `}</style>
     <h4 className="my-2">{relation} </h4>
