@@ -1,66 +1,16 @@
-import { useState} from 'react';
+//firebase関係
+import firebaseApp from "../components/fire"
 import { getStorage, ref, uploadBytesResumable } from 'firebase/storage'
+import {getAuth, onAuthStateChanged} from 'firebase/auth'
+
+const storage = getStorage(firebaseApp)
+const auth = getAuth(firebaseApp);
+
 import Image from 'next/image'
 import loadImage,{LoadImageOptions }from 'blueimp-load-image';
 
-import firebaseApp from "./fire"
-import styles from '../styles/Home.module.scss'
-
-const storage = getStorage(firebaseApp)
-
-const c = "abcdefghijklmnopqrstuvwxyz0123456789";
-const cl = c.length;
-
-export default function UploadLayer(){
-  const [modalAppear, setModalAppear] = useState<boolean>(false)
-  const [btnAppear, setBtnAppear] = useState<boolean>(true)
-  const [uploading, setUploading] = useState<boolean>(false);
-
-  const openModal=()=>{
-    setModalAppear(true)
-    setBtnAppear(false)
-  }
-
-  const closeModal=()=>{
-    setBtnAppear(true)
-    setModalAppear(false)
-  }
-
-  const startUpload=()=>{
-    setUploading(true)
-    setModalAppear(false)
-  }
-
-  const endUpload=()=>{
-    setUploading(false)
-    setBtnAppear(true)
-  }
-
-  return <div>
-    <UploadModal 
-      modalAppear={modalAppear}
-      closeModal={closeModal}
-      startUpload={startUpload}
-      endUpload={endUpload}
-    />
-    {
-      btnAppear
-        &&
-      <UploadBtn openModal={openModal} />
-    }{
-      uploading
-        &&
-      <UploadStatusBar />
-    }
-  </div>
-}
-
-type UploadModalProps={
-  modalAppear:boolean
-  closeModal:()=>void
-  startUpload:()=>void
-  endUpload:()=>void 
-}
+import React, { useState,useEffect} from 'react';
+import { useRouter } from "next/dist/client/router";
 
 type blobedImageObject={
   fileName:string
@@ -68,16 +18,16 @@ type blobedImageObject={
   blobedImage:Blob
 }
 
-const UploadModal=({ 
-    modalAppear,
-    closeModal,
-    startUpload,
-    endUpload }: UploadModalProps) =>{
+const groupDir="groups/"
+
+export default function Home(){
+  const [uploadDir,setUploadDir]=useState<string>(groupDir)
   const [bImgArray,setBImgArray]=useState<blobedImageObject[]>([])
   // 0:まだ写真を選んでいない
   // 1:写真圧縮中
   // 2:アップロード準備完了
   const [imgStatus,setImgStatus]=useState<number>(0)
+  const router = useRouter()
   
   // Eventの型は一回間違えてからエラーが出たところに
   // VSCode上でオーバーレイしてヒントを出すとわかる。
@@ -152,20 +102,12 @@ const UploadModal=({
 
   const handleFireBaseUpload = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    startUpload()
     const uploadTasks=bImgArray.map((bImgO:blobedImageObject)=>{
       // async magic goes here...
       if (!bImgO.blobedImage) {
         console.error(`not an image, the image file is a ${typeof (bImgO.blobedImage)}`)
       } else {
-        var r = "";
-        for(let i=0; i<5; i++){
-          r += c[Math.floor(Math.random()*cl)];
-        }
-
-        const randFileName=`${r}_${bImgO.fileName}`
-
-        const storageRef = ref(storage, `/photos/${randFileName}`)
+        const storageRef = ref(storage, `/${uploadDir}${bImgO.fileName}`)
         const uploadTask = uploadBytesResumable(storageRef, bImgO.blobedImage)
         //initiates the firebase side uploading 
         return new Promise<void>((resolve,reject)=>{
@@ -184,8 +126,11 @@ const UploadModal=({
     }) //end forEach
     Promise.all(uploadTasks).then(()=>{
       clearState()
-      endUpload()
     })
+  }
+
+  const handleInputChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
+    setUploadDir(`${groupDir}${e.target.value}/`)
   }
 
   const clearState=()=>{
@@ -193,67 +138,42 @@ const UploadModal=({
     setImgStatus(0)
   }
 
-  const cancelModal=()=>{
-    clearState()
-    closeModal()
-  }
+  useEffect(()=>{
+    return onAuthStateChanged(auth,(user)=>{    
+      if (user == null){
+        router.push('/login')
+      }
+    })//end onAuthState
+  },[])
 
   return <div>
-    {
-      modalAppear
-        &&
-      <div className={styles.modalOverlay} onClick={cancelModal}>
-        <div className={`row g-0 align-items-center justify-content-center ${styles.modalContent}`}>
-          {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
-          <div className={`col-11 col-lg-5 rounded ${styles.upload_modal}`} onClick={(e: React.MouseEvent<HTMLElement>) => e.stopPropagation()}>
-            <UploadSection 
-              handleFileChange={handleFileChange}
-              handleFireBaseUpload={handleFireBaseUpload}
-              imgStatus={imgStatus}
-              bImgArray={bImgArray}
-            />
-          </div>
-        </div>
-      </div>
-    }
-  </div>
-}
-
-type UploadSectionProps={
-  handleFileChange:(e: React.ChangeEvent<HTMLInputElement>)=>void
-  handleFireBaseUpload:(e:React.FormEvent<HTMLFormElement>)=>void
-  imgStatus:number
-  bImgArray:blobedImageObject[]
-}
-
-const UploadSection = ({
-    handleFileChange,
-    handleFireBaseUpload,
-    imgStatus,
-    bImgArray}:UploadSectionProps)=>{
-
-  return  <div className="p-3">
-    <style jsx>{`
-      .btn-midori{
-        background-color:#87b960;
-      }
-    `}</style>
-    <div className={styles.upload_form}>
-      <form className="form-group" onSubmit={handleFireBaseUpload}>
-        <input className="form-control-file mb-1"
+  <div className={`row g-0 align-items-center justify-content-center`}>
+  {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
+  <div className={`col-11 col-lg-5 rounded `} >
+    <div className="p-3">
+    <form className="form-group" onSubmit={handleFireBaseUpload}>
+      <label>アップロードディレクトリの指定</label>
+      <input className="form-control mb-1"
           // allows you to reach into your file directory and upload image to the browser
-          type="file"
-          accept='image/*'
-          onChange={handleFileChange}
-          multiple
-        />
-        <button disabled={imgStatus!=2} className="btn btn-midori text-white">アップロード</button>
-      </form>
+          type="input"
+          required={true}
+          onChange={handleInputChange}
+      />
+      <input className="form-control-file mb-1"
+        // allows you to reach into your file directory and upload image to the browser
+        type="file"
+        accept='image/*'
+        onChange={handleFileChange}
+        multiple
+      />
+      <button disabled={imgStatus!=2} className="btn btn-primary">アップロード</button>
+    </form>
     </div>
-    <div className={styles.upload_preview}>
-      <ImageSection imgStatus={imgStatus} bImgArray={bImgArray} />
-    </div>
-    </div>
+    アップロードディレクトリ:{uploadDir}
+    <ImageSection imgStatus={imgStatus} bImgArray={bImgArray} />
+  </div>
+  </div>
+  </div>
 }
 
 type ImageSectionProps={
@@ -294,46 +214,23 @@ const ImageSection=({imgStatus,bImgArray}:ImageSectionProps)=>{
 
   if(imgStatus == 0){
     return <div>
-      ※圧縮してアップロードするので容量制限を気にせずアップロードできます！
-      (1,000枚で0.1GB)
-      <br />
+      <style jsx>{`
+        .full{
+          height: 100%
+        }
+      `}</style>
       ※16枚まで同時にアップロードできます
     </div>
   }else if(imgStatus==1){
-    return <div className={`d-flex justify-content-center align-items-center ${styles.full}`}>
+    return <div className="d-flex justify-content-center align-items-center full">
       {/* 高さを親要素の100%とすることで、上下中央寄せができる */}
       <div className="spinner-border" role="status">
         <span className="visually-hidden">Loading...</span>
       </div>
     </div>
   }else{
-    return <div className={`row g-1 align-items-center ${styles.full}`}>
+    return <div className="row g-1 align-items-center full">
       {multiImages}
     </div>
   }
-}
-
-const UploadBtn=({openModal}:{openModal:()=>void})=>{
-  return <div className="btn" onClick={openModal}>
-    <style jsx>{`
-      .btn{
-        z-index:1;
-        position: fixed;
-        bottom: 1rem; 
-        right: 1rem;
-      }
-
-      .circleBtn{
-        width: 3rem;
-        height: 3rem;
-      }
-    `}</style>
-  <img className="circleBtn" src="./upload.svg"></img>
-</div>;
-}
-
-const UploadStatusBar=()=>{
-  return <div className={`row justify-content-center ${styles.fixed_upload_status}`}>
-    <div className='col-10 col-lg-5'>アップロード中…</div>
-  </div>
 }
