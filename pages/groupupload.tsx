@@ -29,6 +29,7 @@ export default function Home(){
   const [imgStatus,setImgStatus]=useState<number>(0)
   const router = useRouter()
   const fileRef=useRef<HTMLInputElement>(null)
+  const [pixel,setPixel]=useState<number>(600)
   
   // Eventの型は一回間違えてからエラーが出たところに
   // VSCode上でオーバーレイしてヒントを出すとわかる。
@@ -60,8 +61,8 @@ export default function Home(){
     const length=Math.min(files.length,16)
     for (let i=0;i<length;i++){
       const options:LoadImageOptions={
-        maxWidth: 600,
-        maxHeight: 600,
+        maxWidth: pixel,
+        maxHeight: pixel,
         canvas:true
       };
 
@@ -135,6 +136,12 @@ export default function Home(){
     setUploadDir(`${groupDir}${e.target.value}/`)
   }
 
+  const doChangePx=(e:React.ChangeEvent<HTMLInputElement>)=>{
+    if(e.target && e.target.value){
+      setPixel(Number(e.target.value))
+    }
+  }
+
   const clearState=()=>{
     setBImgArray([])
     setImgStatus(0)
@@ -152,14 +159,25 @@ export default function Home(){
   <div className={`row g-0 align-items-center justify-content-center`}>
   {/* ここでg-0を指定しないと、子要素のdivが横長になってしまう */}
   <div className={`col-11 col-lg-5 rounded `} >
-    <div className="p-3">
+    <div className="p-3 g-2">
     <form className="form-group" onSubmit={handleFireBaseUpload}>
-      <label>アップロードディレクトリの指定</label>
-      <input className="form-control mb-1"
+      <label htmlFor="directory">アップロードディレクトリの指定</label>
+      <input 
+        id="directory"
+        className="form-control mb-1"
           // allows you to reach into your file directory and upload image to the browser
-          type="input"
-          required={true}
-          onChange={handleInputChange}
+        type="input"
+        required={true}
+        onChange={handleInputChange}
+      />
+      <label htmlFor="pixel">圧縮サイズ(pixel)</label>
+      <input 
+        className="form-control" 
+        type="number" 
+        id="pixel" 
+        onChange={doChangePx} 
+        value={pixel} 
+        autoComplete="off" 
       />
       <input className="form-control-file mb-1"
         // allows you to reach into your file directory and upload image to the browser
