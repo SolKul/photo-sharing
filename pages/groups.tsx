@@ -7,23 +7,18 @@ import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import { useState,useEffect } from "react";
 import { useRouter } from "next/dist/client/router";
 
-import { Swiper, SwiperSlide, useSwiper } from 'swiper/react' //カルーセル用のタグをインポート
+import { Swiper, SwiperSlide } from 'swiper/react' //カルーセル用のタグをインポート
 import { Pagination, Navigation,Lazy} from 'swiper' //使いたい機能をインポート
 
 
 import Layout from '../components/Layout'
 import Image from 'next/image'
 import 'swiper/css/bundle'
+import Link from "next/link";
 
 const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp)
 const auth = getAuth(firebaseApp);
-
-type FileInfo={
-  thumbFilePath:string
-  previewFilePath:string
-  id:string
-}
 
 type GroupImInfo={
   id:string
@@ -40,7 +35,7 @@ type GroupInfo={
 
 const tableLayoutImage="groups/tableLayout.png"
 const groupDir="groups/"
-const groomGroups=["daikin","seattle","robot"]
+const groomGroups=["daikin","mecha","robot","radio","seattle","lab","groom_relatives","groom_family"]
 const brideGroups=["test_group","test_group2"]
 
 export default function Home(){
@@ -72,19 +67,20 @@ export default function Home(){
     })
   }
   
-  const groomGroupIntros=groomGroups.map((item)=>{
+  const groomGroupIntros=groomGroups.map((item,index)=>{
     if (gInfoList && (item in gInfoList)){
       return <GroupIntroduction 
         key={item}
         dirName={item} 
         table={gInfoList[item].table} 
         relation={gInfoList[item].relation}
-        explanation={gInfoList[item].explanation} 
+        explanation={gInfoList[item].explanation}
+        borderColor="#539daf"
       />
     }
   })
 
-  const brideGroupIntros=brideGroups.map((item)=>{
+  const brideGroupIntros=brideGroups.map((item,index)=>{
     if (gInfoList && (item in gInfoList)){
       return <GroupIntroduction 
         key={item}
@@ -92,6 +88,7 @@ export default function Home(){
         table={gInfoList[item].table} 
         relation={gInfoList[item].relation}
         explanation={gInfoList[item].explanation}  
+        borderColor="#cf87cc"
       />
     }
   })
@@ -112,6 +109,9 @@ export default function Home(){
     <div className={`row g-0 align-items-center justify-content-center`}>
     <div className={`col-11 col-lg-5 slideContent`} >  
     <h2 className="my-3">ゲスト紹介</h2>
+    <Link href="#groom_introduction"><a>新郎側ゲスト紹介&gt;&gt;</a></Link>
+    <br />
+    <Link href="#bride_introduction"><a>新婦側ゲスト紹介&gt;&gt;</a></Link>
       <h4 className="my-1">テーブルレイアウト</h4>
       {
         tableLOUrl
@@ -126,9 +126,9 @@ export default function Home(){
           unoptimized={true}
         />
       }
-    <h3 className="my-3">新郎ゲスト</h3>
+    <h3 className="my-3" id="groom_introduction" >新郎ゲスト</h3>
     {groomGroupIntros}
-    <h3 className="my-3">新婦ゲスト</h3>
+    <h3 className="my-3" id="bride_introduction" >新婦ゲスト</h3>
     {brideGroupIntros}
     </div>
     </div> 
@@ -142,9 +142,10 @@ type GroupIntroductionProps={
   table:string
   relation:string
   explanation:string
+  borderColor:string
 }
 
-const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionProps)=>{
+const GroupIntroduction=({dirName,table,relation,explanation,borderColor}:GroupIntroductionProps)=>{
   const [imList, setImList] = useState<GroupImInfo[]>([])
 
   // dirName以下の画像をlistAllで取得する
@@ -213,7 +214,7 @@ const GroupIntroduction=({dirName,table,relation,explanation}:GroupIntroductionP
   return <div className="testClasss">
     <style jsx>{`
       .testClasss{
-        border: solid #000 2px;
+        border: solid 2px ${borderColor};
       }
     `}</style>
     <h4 className="my-2">{relation} </h4>
