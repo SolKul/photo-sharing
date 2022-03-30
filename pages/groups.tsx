@@ -5,7 +5,7 @@ import { getStorage, ref,listAll, getDownloadURL,StorageReference } from 'fireba
 import {getAuth, onAuthStateChanged} from 'firebase/auth'
 
 import { useState,useEffect } from "react";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 
 import { Swiper, SwiperSlide } from 'swiper/react' //カルーセル用のタグをインポート
 import { Pagination, Navigation,Lazy} from 'swiper' //使いたい機能をインポート
@@ -36,7 +36,7 @@ type GroupInfo={
 const tableLayoutImage="groups/tableLayout.png"
 const groupDir="groups/"
 const groomGroups=["daikin","mecha","robot","radio","seattle","lab","groom_relatives","groom_family"]
-const brideGroups=["test_group","test_group2"]
+const brideGroups=["bride_joteni","bride_attra","bride_hus","bride_hitz","bride_relatives","bride_family"]
 
 export default function Home(){
   const [gInfoList,setGInfoList]=useState<GroupInfo>()
@@ -57,10 +57,12 @@ export default function Home(){
     getDocs(GroupInfoQuery).then((snapshot:QuerySnapshot)=>{
       snapshot.forEach((document)=>{
         const doc=document.data()
-        tmpGroupInfo[doc.dirName]={
-          table:doc.table,
-          relation:doc.relation,
-          explanation:doc.explanation
+        if(doc.dirName){
+          tmpGroupInfo[doc.dirName]={
+            table:doc.table,
+            relation:doc.relation,
+            explanation:doc.explanation
+          }
         }
       })
       setGInfoList(tmpGroupInfo)
@@ -216,6 +218,10 @@ const GroupIntroduction=({dirName,table,relation,explanation,borderColor}:GroupI
       .testClasss{
         border: solid 2px ${borderColor};
       }
+
+      .explanation{
+        white-space: pre-wrap
+      }
     `}</style>
     <h4 className="my-2">{relation} </h4>
     <h5>テーブル: {table}</h5>
@@ -232,7 +238,8 @@ const GroupIntroduction=({dirName,table,relation,explanation,borderColor}:GroupI
     >
       {slideList}
     </Swiper>
-    <h6 className="m-2">{explanation}</h6>
+    {/* 改行コードは前のバッククォートがエスケープされてしまうので\\nを\nに変換する */}
+    <h6 className="m-2 explanation">{explanation.replace(/\\n/g, "\n")}</h6>
     </div>
 }
 

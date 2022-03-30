@@ -4,7 +4,7 @@ import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import { useState,useEffect,useRef } from "react";
 
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import { ImageInfo } from "../components/ImageList";
 
 import Image from 'next/image'
