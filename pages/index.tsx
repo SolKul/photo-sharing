@@ -7,7 +7,7 @@ import { useState,useEffect } from "react";
 import Layout from '../components/Layout'
 import UploadLayer from "../components/UploadLayer";
 import { ImageList,ImageInfo } from "../components/ImageList";
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 import styles from '../styles/Home.module.scss'
 
 const db = getFirestore(firebaseApp);

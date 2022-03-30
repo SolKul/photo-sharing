@@ -10,7 +10,7 @@ import Image from 'next/image'
 import loadImage,{LoadImageOptions }from 'blueimp-load-image';
 
 import React, { useState,useEffect,useRef} from 'react';
-import { useRouter } from "next/dist/client/router";
+import { useRouter } from "next/router";
 
 type blobedImageObject={
   fileName:string
