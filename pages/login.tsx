@@ -104,6 +104,14 @@ export default function Home(){
       .btn-midori{
         background-color:#87b960;
       }
+
+      .footer{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+      }
     `}</style>
     <Layout header='T&amp;M Wedding' title='T&amp;M Wedding' href="/login">
     <div className="container mt-5 text-center">
@@ -121,6 +129,7 @@ export default function Home(){
         <div></div>
         <div className="text-start col-11 col-md-6 ">{message}</div>
       </fieldset>
+      <div className="footer"><h6>※このWebサイトは4/9までご利用になれます</h6></div>
       </form>
     </div>
     </Layout>

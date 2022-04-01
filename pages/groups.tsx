@@ -35,7 +35,7 @@ type GroupInfo={
 
 const tableLayoutImage="groups/tableLayout.png"
 const groupDir="groups/"
-const groomGroups=["daikin","mecha","robot","radio","seattle","lab","groom_relatives","groom_family"]
+const groomGroups=["mecha","robot","radio","seattle","lab","daikin","groom_relatives","groom_family"]
 const brideGroups=["bride_joteni","bride_attra","bride_hus","bride_hitz","bride_relatives","bride_family"]
 
 export default function Home(){
