@@ -40,9 +40,9 @@
 + [x] 複数画像アップロード
 + [ ] 写真プレビューページを複数ページに→
 https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_query
-+ [ ] グループ紹介ページ
++ [x] グループ紹介ページ
 + [ ] セットリスト
-+ [ ] スライドショー
++ [x] スライドショー
 + [ ] 初回アクセスのみ使用方法アナウンス
 
 # UploadLayerコンポーネント

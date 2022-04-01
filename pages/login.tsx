@@ -100,7 +100,20 @@ export default function Home(){
   }
 
   return <div>
-    <Layout header='Photo Sharing' title='Login Page' href="/login">
+    <style jsx>{`
+      .btn-midori{
+        background-color:#87b960;
+      }
+
+      .footer{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+      }
+    `}</style>
+    <Layout header='T&amp;M Wedding' title='T&amp;M Wedding' href="/login">
     <div className="container mt-5 text-center">
       <form className="form-group">
       <fieldset className="row justify-content-center g-1" disabled={isVerifying}>
@@ -112,10 +125,11 @@ export default function Home(){
           <input className="form-control form-control-lg" type="number" id="code" onChange={doChangeCode} value={code} autoComplete="off" ></input>
         </div>
         <div></div>
-        <input type="submit" className="col-11 col-md-6 btn btn-primary" onClick={doLogin} value="ログイン" />
+        <input type="submit" className="col-11 col-md-6 btn btn-midori text-white" onClick={doLogin} value="ログイン" />
         <div></div>
         <div className="text-start col-11 col-md-6 ">{message}</div>
       </fieldset>
+      <div className="footer"><h6>※このWebサイトは4/9までご利用になれます</h6></div>
       </form>
     </div>
     </Layout>

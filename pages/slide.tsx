@@ -2,13 +2,15 @@ import firebaseApp from "../components/fire"
 import { getFirestore,collection, query, orderBy, QuerySnapshot, onSnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth, onAuthStateChanged} from 'firebase/auth'
-import { useState,useEffect } from "react";
+import { useState,useEffect,useRef } from "react";
 
-import Layout from '../components/Layout'
-import UploadLayer from "../components/UploadLayer";
-import { ImageList,ImageInfo } from "../components/ImageList";
 import { useRouter } from "next/router";
-import styles from '../styles/Home.module.scss'
+import { ImageInfo } from "../components/ImageList";
+
+import Image from 'next/image'
+import { Swiper, SwiperSlide } from 'swiper/react' //カルーセル用のタグをインポート
+import { Pagination, Navigation,Autoplay,Lazy} from 'swiper' //使いたい機能をインポート
+import 'swiper/css/bundle'
 
 const db = getFirestore(firebaseApp);
 const storage = getStorage(firebaseApp)
@@ -23,7 +25,7 @@ type FileInfo={
 /**
  * 画像情報を格納した配列と、それが完了するPromiseの配列tasksを返す
  */
-const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
+ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
   // 順番通りに画像情報を格納するための配列
   const fileInfoList:FileInfo[]=[]
   // imlistにsetする前の画像情報を格納するための仮の配列
@@ -32,16 +34,18 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
   const tasks: Array<Promise<string|void>> = [];
 
   // 配列の要素全てを取り出し、file情報を順番通りにfileInfoListに格納
-  snapshot.forEach((document)=>{
-    const doc=document.data()
-    if (doc.thumbFilePath && doc.filePath && doc.visibility){
-      fileInfoList.push(
-        {
-          thumbFilePath:doc.thumbFilePath,
-          previewFilePath:doc.filePath,
-          id:document.id
-        }
-      )
+  snapshot.docChanges().forEach((change)=>{
+    if (change.type=="added"){
+      const doc=change.doc.data()
+      if (doc.thumbFilePath && doc.filePath){
+        fileInfoList.push(
+          {
+            thumbFilePath:doc.thumbFilePath,
+            previewFilePath:doc.filePath,
+            id:change.doc.id
+          }
+        )
+      }
     }
   });
 
@@ -93,9 +97,14 @@ const genFetchUrlTasks=(snapshot:QuerySnapshot)=>{
 export default function Home(){
   const [imList, setImlist] = useState<ImageInfo[]>([])
   const [authLoading,setAuthLoading]=useState<boolean>(true)
+  const [curIndex,setCurIndex]=useState<number>(0)
   const router=useRouter()
+  const stateCurIndex=useRef<number>()
+  stateCurIndex.current=curIndex
 
+  // 画像をonSnapshotで差分取得する
   const fetchImage=()=>{
+    console.log("start fetch images")
     // collection()が失敗するかもしれないのでtry~catchで囲む
     try{
       // collectionへの参照を取得
@@ -108,7 +117,14 @@ export default function Home(){
         (snapshot)=>{
           genFetchUrlTasks(snapshot)
           .then((tmpImList) => {
-            setImlist(tmpImList)
+            // コールバック関数内では最新のhookにアクセスできないので、
+            // useRefのcurrentを使う。
+            // https://stackoverflow.com/questions/57847594/react-hooks-accessing-up-to-date-state-from-within-a-callback
+            setImlist((prevList)=>[
+              ...prevList.slice(0,stateCurIndex.current),
+              ...tmpImList,
+              ...prevList.slice(stateCurIndex.current)
+            ])
             setAuthLoading(false)
           })// end Promise
         },
@@ -126,7 +142,7 @@ export default function Home(){
       router.push('/login')
     }
   }
-
+  
   useEffect(()=>{
     return onAuthStateChanged(auth,(user)=>{    
       if (user == null){
@@ -136,52 +152,68 @@ export default function Home(){
       }// end else
     })//end onAuthState
   },[])
+  
+  // swiperの中で表示するSwiperSlide要素のリストを作成する
+  const slidelist=imList.map((item:ImageInfo)=>{
+    if (item.valid){
+      return <SwiperSlide key={item.id}>
+        <Image 
+          src={item.previewUrl} 
+          height="500" 
+          width="500"
+          objectFit="contain"
+          layout="responsive"
+          alt="" 
+          unoptimized={true}
+        />
+      </SwiperSlide>
+    }
+  })
 
-  return (
-    <div>
-      <Layout header='T&amp;M Wedding' title='T&amp;M Wedding' href="/">
-        <div className="container mt-2">
-          {
-            authLoading
-              ?
-            <div>
-            <div style={{height: "10rem"}} />
-            <div className={`d-flex justify-content-center`}>
-              <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-            </div>
-              :
-            <div>
-            <ImageList imlist={imList}/>
-            <UploadLayer/>
-            </div>
-          }
-        </div>
-      <GuestBtn/>
-      </Layout>
-    </div>
-  )
-}
+  return <div>
+  <style jsx>{`
+    .slideContent{
+      position: relative;
+    }
 
-const GuestBtn=()=>{
-  const router = useRouter()
+    .slideContent::before{
+      content: "";
+      display: block;
+      padding-top: 50%;
+      width: 100%;
+    }
 
-  return <div className="btn" onClick={()=>{router.push("/groups")}}>
-    <style jsx>{`
-      .btn{
-        z-index:1;
-        position: fixed;
-        bottom: 5rem; 
-        right: 1rem;
-      }
-      
-      .circleBtn{
-        width: 3rem;
-        height: 3rem;
-      }
-    `}</style>
-    <img className="circleBtn" src="./guests.svg"></img>
+    .slideContent>div{
+      // border: solid #000 2px;
+      position: absolute; // 浮かせる
+      width: 90%; // 親要素の90%
+      height: 90%; // 親要素の90%
+      top: 5%;
+      left: 5%;
+    }
+  `}</style>
+  <div className={`row g-0 align-items-center justify-content-center`}>
+  <div className={`col-11 col-lg-11 slideContent`} >  
+  <div>
+    <Swiper
+      onSlideChange={(e) => {
+        setCurIndex(e.realIndex)
+      }}
+      modules={[Navigation, Pagination,Autoplay,Lazy]}
+      slidesPerView={2} //一度に表示するスライドの数
+      // pagination={{
+      //   clickable: true,
+      // }} //　何枚目のスライドかを示すアイコン、スライドの下の方にある
+      // navigation //スライドを前後させるためのボタン、スライドの左右にある
+      loop={true}
+      lazy={true}
+      // 5秒でスライド、操作したらスライドを停止する機能をoff
+      autoplay={{delay:3000,disableOnInteraction:false}}
+    >
+      {slidelist}
+    </Swiper>
   </div>
+  </div>
+  </div>
+  </div> 
 }
