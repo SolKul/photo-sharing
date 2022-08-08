@@ -12,7 +12,7 @@ import {
   startAfter
 } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
-import {getAuth, onAuthStateChanged, Unsubscribe} from 'firebase/auth'
+import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import { useState } from "react";
 
 const db = getFirestore(firebaseApp);
@@ -190,11 +190,11 @@ const usePagination=(numLimit:number)=>{
 }
 
 
-export const useImages=()=>{
+export const useImages=(numLimit:number)=>{
   const [imgList, setImglist] = useState<ImageInfo[]>([])
   const [isLoading,setIsLoading]=useState<boolean>(true)
   const [isError,setIsError]=useState<boolean>(false)
-  const {existAdjacentPage,readPage}=usePagination(3)
+  const {existAdjacentPage,readPage}=usePagination(numLimit)
 
   /**
    * onAuthStateChangedに画像をロードする関数を与える

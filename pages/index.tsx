@@ -1,36 +1,29 @@
-import firebaseApp from "../components/fire"
-import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import { useState,useEffect } from "react";
 
 import Layout from '../components/Layout'
 import UploadLayer from "../components/UploadLayer";
-import { ImageList,ImageInfo } from "../components/ImageList";
-import {fetchImage} from "../components/GetImages"
+import { ImageList} from "../components/ImageList";
+import { useImages} from "../components/GetImages"
 import { useRouter } from "next/router";
 
-const auth = getAuth(firebaseApp);
-
 export default function Home(){
-  const [imList, setImlist] = useState<ImageInfo[]>([])
-  const [authLoading,setAuthLoading]=useState<boolean>(true)
   const router=useRouter()
+  const {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}=useImages(10)
 
   useEffect(()=>{
-    return onAuthStateChanged(auth,(user)=>{    
-      if (user == null){
-        router.push('/login')
-      }else{
-        return fetchImage(setImlist,setAuthLoading,router)
-      }// end else
-    })//end onAuthState
+    authAndFetchImages()
   },[])
+
+  useEffect(()=>{
+    isError && router.push("/login")
+  },[isError])
 
   return (
     <div>
       <Layout header='T&amp;M Wedding' title='T&amp;M Wedding' href="/">
         <div className="container mt-2">
           {
-            authLoading
+            isLoading
               ?
             <div>
             <div style={{height: "10rem"}} />
@@ -42,8 +35,18 @@ export default function Home(){
             </div>
               :
             <div>
-            <ImageList imlist={imList}/>
+            <ImageList imgList={imgList}/>
             <UploadLayer/>
+            {
+              existAdjacentPage.prev
+                &&
+              <div onClick={fetchImages.bind(null,"prev")}>prev</div>
+            }
+            {
+              existAdjacentPage.next
+                &&
+              <div onClick={fetchImages.bind(null,"next")}>next</div>
+            }
             </div>
           }
         </div>
