@@ -52,7 +52,7 @@ export type FirstLastDoc={
   last:QueryDocumentSnapshot<DocumentData>
 }
 
-type MoveDirection = "forward" | "backward";
+type MoveDirection = "prev" | "next";
 
 type AdjacentPageSnapshot = {
   prev:QuerySnapshot<DocumentData>|null,
@@ -131,7 +131,7 @@ export function useReadList(numLimit:number){
 
       // 次のページをロードし、次のページががあるかないかをexistPrevPageに保存する
       // 最初のページを読み込んだはずなので、前のページはないはず
-      loadAdjacentPage(snapshot,"forward","forward")
+      loadAdjacentPage(snapshot,"next","next")
         .then((result)=>{setExistNextPage(result)})
     }catch(error){
       throw(error)
@@ -154,13 +154,10 @@ export function useReadList(numLimit:number){
     try{
       const tmpList:DummyData[]=[]
 
-      // ページ移動の方向が次か前かをtrueかfalseにする
-      const forwardOrNot = moveDirection=="forward"
       // 次のページに移動する場合はadjacentPageSnapshot["next"]のsnapshotを取り出す。
       // 前のページに移動する場合はadjacentPageSnapshot["prev"]のsnapshotを取り出す。
-      const adjacentPage = forwardOrNot ? "next" : "prev"
-      const snapshot=adjacentPageSnapshot[adjacentPage]
-      if (!snapshot){throw("error")}
+      const snapshot=adjacentPageSnapshot[moveDirection]
+      if (!snapshot){return Promise.reject("error")}
       // snapshotのそれぞれ(=データ1件ずつ)読み込み
       // tmpListにidとdataをオブジェクトとしてpushする
       snapshot.forEach(
@@ -176,14 +173,14 @@ export function useReadList(numLimit:number){
       )
       // 次のページに移動した場合はそのままの順序で、
       // 前のページに移動した場合は逆順にしてdataListに保存する
-      forwardOrNot ? setDataList(tmpList) : setDataList(tmpList.reverse())
+      moveDirection=="next" ? setDataList(tmpList) : setDataList(tmpList.reverse())
       setListLoading(false)
 
       // 前のページをロードし、前のページがあるかないかをexistPrevPageに保存する
-      loadAdjacentPage(snapshot,moveDirection,"backward")
+      loadAdjacentPage(snapshot,moveDirection,"prev")
         .then((result)=>{setExistPrevPage(result)})
       // 次のページをロードし、次のページがあるかないかをexistPrevPageに保存する
-      loadAdjacentPage(snapshot,moveDirection,"forward")
+      loadAdjacentPage(snapshot,moveDirection,"next")
         .then((result)=>{setExistNextPage(result)})
     }catch(error){
       console.log(error)
@@ -203,16 +200,12 @@ export function useReadList(numLimit:number){
       oldMoveDirection:MoveDirection,
       moveDirection:MoveDirection)=>{
     try{
+      if(oldSnapshot.docs.length==0)return false
       const dummyRef=collection(db, 'dummy');
 
-      // ページ移動の方向が次か前かをtrueかfalseにする
-      const forwardOrNot = moveDirection=="forward"
       // 次のページに移動する場合はorderbyは昇順
       // 前のページに移動する場合はorderbyは降順でソートする
-      const direction = forwardOrNot ? "asc" : "desc"
-      // 次のページに移動する場合はadjacentPageSnapshot["next"]のsnapshot、
-      // 前のページに移動する場合はadjacentPageSnapshot["prev"]のsnapshotを更新する
-      const adjacentPage= forwardOrNot ? "next" : "prev"
+      const direction = moveDirection=="next" ? "asc" : "desc"
 
       // firestoreからデータを取得するqueryにおいて、
       // どこからデータを取得するstartAfterについて、
@@ -229,9 +222,12 @@ export function useReadList(numLimit:number){
       )
       const dummyQuery=query(dummyRef,orderBy("id",direction),limit(numLimit),startAfter(startAfterTarget))
       const newSnapshot = await getDocs(dummyQuery)
+
+      // 次のページに移動する場合はadjacentPageSnapshot["next"]のsnapshot、
+      // 前のページに移動する場合はadjacentPageSnapshot["prev"]のsnapshotを更新する
       setAdjacentPageSnapshot(
         (prevAdjacentPageSnapshot)=>{
-          prevAdjacentPageSnapshot[adjacentPage]=newSnapshot
+          prevAdjacentPageSnapshot[moveDirection]=newSnapshot
           return prevAdjacentPageSnapshot
         }
       )

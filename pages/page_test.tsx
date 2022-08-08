@@ -34,12 +34,12 @@ export default function Home(){
     {
       existPrevPage
         &&
-      <div onClick={readPage.bind(null,"backward")}>prev</div>
+      <div onClick={readPage.bind(null,"prev")}>prev</div>
     }
     {
       existNextPage
         &&
-      <div onClick={readPage.bind(null,"forward")}>next</div>
+      <div onClick={readPage.bind(null,"next")}>next</div>
     }
   </div>
 }
