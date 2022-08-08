@@ -109,8 +109,8 @@ const UploadModal=({
     const length=Math.min(files.length,16)
     for (let i=0;i<length;i++){
       const options:LoadImageOptions={
-        maxWidth: 600,
-        maxHeight: 600,
+        maxWidth: 1200,
+        maxHeight: 1200,
         canvas:true
       };
 
