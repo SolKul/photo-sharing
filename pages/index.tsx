@@ -3,12 +3,12 @@ import { useState,useEffect } from "react";
 import Layout from '../components/Layout'
 import UploadLayer from "../components/UploadLayer";
 import { ImageList} from "../components/ImageList";
-import { useImages} from "../components/GetImages"
+import { useImages,TargetType,ExitAdjacentPage } from "../components/GetImages"
 import { useRouter } from "next/router";
 
 export default function Home(){
   const router=useRouter()
-  const {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}=useImages(10)
+  const {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}=useImages(30)
 
   useEffect(()=>{
     authAndFetchImages()
@@ -37,16 +37,7 @@ export default function Home(){
             <div>
             <ImageList imgList={imgList}/>
             <UploadLayer/>
-            {
-              existAdjacentPage.prev
-                &&
-              <div onClick={fetchImages.bind(null,"prev")}>prev</div>
-            }
-            {
-              existAdjacentPage.next
-                &&
-              <div onClick={fetchImages.bind(null,"next")}>next</div>
-            }
+            <NextPrev existAdjacentPage={existAdjacentPage} fetchImages={fetchImages} />
             </div>
           }
         </div>
@@ -54,6 +45,33 @@ export default function Home(){
       </Layout>
     </div>
   )
+}
+
+const NextPrev=(
+  {existAdjacentPage,fetchImages}:{existAdjacentPage:ExitAdjacentPage,fetchImages:(target:TargetType)=>void})=>{
+  return <div className="row">
+    <style jsx>{`
+      .font{
+        font-family: 'Amatic SC', cursive;
+        font-weight: 700;
+      }
+    `}</style>
+    <div className="col-5">
+      {
+        existAdjacentPage.prev
+          &&
+        <p className="text-end font h3" onClick={fetchImages.bind(null,"prev")}>&lt;prev</p>
+      }
+    </div>
+    <div className="col-1"></div>
+    <div className="col-5">
+      {
+        existAdjacentPage.next
+          &&
+        <p className="text-start font h3" onClick={fetchImages.bind(null,"next")}>next&gt;</p>
+      }
+    </div>
+  </div>
 }
 
 const GuestBtn=()=>{

@@ -43,9 +43,9 @@ const initAdjacentPageSnapshot={
   next:null
 }
 
-type TargetType= "first" | MoveDirection
+export type TargetType= "first" | MoveDirection
 
-type ExitAdjacentPage={
+export type ExitAdjacentPage={
   prev:boolean,
   next:boolean
 }
