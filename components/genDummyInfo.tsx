@@ -64,6 +64,8 @@ const initAdjacentPageSnapshot={
   next:null
 }
 
+type TargetType= "first" | MoveDirection
+
 
 /**
  * 指定した件数ずつデータを読み込み、
@@ -82,6 +84,14 @@ export function useReadList(numLimit:number){
   const [existNextPage,setExistNextPage] = useState<boolean>(false)
   const [existPrevPage,setExistPrevPage]= useState<boolean>(false)
   const [adjacentPageSnapshot,setAdjacentPageSnapshot]=useState<AdjacentPageSnapshot>(initAdjacentPageSnapshot)
+
+  /**
+   * 最初のページまたは次、前のページを表示する
+   * @param target どのページを表示するか
+   */
+  const readPage=(target:TargetType)=>{
+    target=="first" ? readFirst() : movePage(target)
+  }
 
   /**
    * 最初のページを読み込む関数。
@@ -232,6 +242,6 @@ export function useReadList(numLimit:number){
     }
   }
 
-  return {dataList,listLoading,existNextPage,existPrevPage,readFirst,movePage}
+  return {dataList,listLoading,existNextPage,existPrevPage,readPage}
 }
 

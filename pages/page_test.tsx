@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import {genDummyList,useReadList,DummyData} from "../components/genDummyInfo"
 
 export default function Home(){
@@ -7,8 +7,7 @@ export default function Home(){
     listLoading,
     existNextPage,
     existPrevPage,
-    readFirst,
-    movePage
+    readPage
   }=useReadList(10)
 
   const writeData=()=>{
@@ -16,13 +15,13 @@ export default function Home(){
   }
 
   useEffect(
-    ()=>{readFirst()},
+    readPage.bind(null,"first"),
     []
   )
 
   return <div>
     <div onClick={writeData}>Write Data</div>
-    <div onClick={readFirst}>Read Data</div>
+    <div onClick={readPage.bind(null,"first")}>Read Data</div>
     {
       listLoading
         ?
@@ -35,12 +34,12 @@ export default function Home(){
     {
       existPrevPage
         &&
-      <div onClick={movePage.bind(null,"backward")}>prev</div>
+      <div onClick={readPage.bind(null,"backward")}>prev</div>
     }
     {
       existNextPage
         &&
-      <div onClick={movePage.bind(null,"forward")}>next</div>
+      <div onClick={readPage.bind(null,"forward")}>next</div>
     }
   </div>
 }
