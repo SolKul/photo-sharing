@@ -4,14 +4,8 @@ import Image from 'next/image'
 
 import styles from '../styles/Home.module.scss'
 
+import {ImageInfo} from "./GetImages"
 import {PreviewModal,idAndUrl} from "./PreviewModal"
-
-export type ImageInfo = {
-  id: string
-  thumbUrl: string
-  previewUrl:string
-  valid:boolean
-}
 
 type ImageListProps = {
   imlist: ImageInfo[]
@@ -27,6 +21,7 @@ export const ImageIdList = ({ imlist }: ImageListProps) => {
   const listItems = imlist.map((item: ImageInfo) =>
     <li key={item.id}>
       id: {item.id}
+      url: {item.previewUrl}
     </li>
   );
 

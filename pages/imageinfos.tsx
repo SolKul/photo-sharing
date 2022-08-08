@@ -1,16 +1,15 @@
 import { useEffect } from "react";
 
 import { ImageIdList } from "../components/ImageList";
-import { userImages } from "../components/GetImages"
-import UploadLayer from "../components/UploadLayerMod"
+import { useImages } from "../components/GetImages"
 import { useRouter } from "next/router";
 
 export default function Home(){
-  const {imgList,isLoading,isError,startFetchImages}=userImages()
+  const {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}=useImages()
   const router=useRouter()
 
   useEffect(()=>{
-    startFetchImages()
+    authAndFetchImages()
   },[])
 
   useEffect(()=>{
@@ -32,7 +31,16 @@ export default function Home(){
         :
       <div>
         <ImageIdList imlist={imgList} />
-        <UploadLayer />
+        {
+          existAdjacentPage.prev
+            &&
+          <div onClick={fetchImages.bind(null,"prev")}>prev</div>
+        }
+        {
+          existAdjacentPage.next
+            &&
+          <div onClick={fetchImages.bind(null,"next")}>next</div>
+        }
       </div>
     }
   </div>
