@@ -1,23 +1,25 @@
-import firebaseApp from "../components/fire"
-import { useState,useEffect } from "react";
+import { useEffect } from "react";
 
-import { ImageIdList,ImageInfo } from "../components/ImageList";
-import {fetchImage} from "../components/GetImagesMod"
+import { ImageIdList } from "../components/ImageList";
+import { userImages } from "../components/GetImages"
 import UploadLayer from "../components/UploadLayerMod"
 import { useRouter } from "next/router";
 
 export default function Home(){
-  const [imList, setImlist] = useState<ImageInfo[]>([])
-  const [authLoading,setAuthLoading]=useState<boolean>(true)
+  const {imgList,isLoading,isError,startFetchImages}=userImages()
   const router=useRouter()
 
   useEffect(()=>{
-    return fetchImage(setImlist,setAuthLoading,null)
+    startFetchImages()
   },[])
+
+  useEffect(()=>{
+    isError && router.push("/login")
+  },[isError])
 
   return <div>
     {
-      authLoading
+      isLoading
         ?
       <div>
         <div style={{height: "10rem"}} />
@@ -29,7 +31,7 @@ export default function Home(){
       </div>
         :
       <div>
-        <ImageIdList imlist={imList} />
+        <ImageIdList imlist={imgList} />
         <UploadLayer />
       </div>
     }
