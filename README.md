@@ -1,7 +1,7 @@
 # Photo Sharing Project
 
 - Firebase Cloud Functionを使った認証コードログイン
-- 更新があったら写真一覧更新
+- ~~更新があったら写真一覧更新~~
 - Promise.allで並列処理で写真一覧ダウンロード
 - インスタグラム風に写真一覧を表示
 - 写真プレビューモーダル
@@ -11,6 +11,79 @@
 - 画像の圧縮も並列処理
 - アップロード処理も並列処理
 - アップロード後、Cloud Functionで圧縮し、サムネイル用画像を生成し、Firestoreに画像情報登録
+- グループ紹介ページ
+
+# 開発環境
+
+Windowsの場合、以下を参考にsshエージェントを設定する  
+https://qiita.com/SolKul/items/3103fdde94c09b044a3a
+
+
+次にDockerでnodeのimageをpullして、次のようにコンテナを起動
+
+```shell-session
+# docker --name photo-sharing -it node /bin/bash
+```
+
+VS CodeのRemote Containerでコンテナに入り、`mkdir`で`/home/node/work/`を作成する。そしてそこをワークスペースとしてVS Codeの`Open Folder`で再度開く。
+
+sshエージェントが正しく設定できていれば、次でgithubへの接続の確認とgithubの公開鍵の登録(=接続先として登録)ができる。
+```shell-session
+# ssh -T git@github.com
+```
+
+このリポジトリをクローンする。
+
+npmパッケージが古くなっていないかと、古くなっていた場合のアップデートを次の記事を参考に行う。
+
+[npmパッケージのvulnerability対応フロー](https://qiita.com/riversun/items/7f1679509f38b1ae8adb)
+
+パッケージがインストールできれば、次のコマンドで開発環境のwebアプリが立ち上がる
+
+```shell-session
+# npm run dev
+```
+
+React/Nextは基本的にクライアントサイドで動くものなので、クライアントサイドのデバッグ環境を整えれば、ブラウザ経由の操作に対応してブレークポイントでデバッグすることができる。
+
+
+基本的に`.vscode/launch.json`を次のようにすれば`npm run dev`した後に`F5`を押すとブラウザが立ち上がり、デバッグできる。
+
+```launchjson
+"configurations": [
+  {
+    "name": "Launch Chrome",
+    "request": "launch",
+    "type": "chrome",
+    "url": "http://localhost:3000",
+    "webRoot": "${workspaceFolder}/photo-sharing",
+    "sourceMaps": true,
+    "sourceMapPathOverrides": {
+        "webpack://_N_E/./*": "${workspaceFolder}/photo-sharing/*"
+    }
+  }
+]
+```
+
+launch.jsonについて
+- webRootをソースがあるworkspaceFolder以下の適切なディレクトリに設定する
+- sourceMapPathOverridesで「ブラウザ(http?)越しに見えるソース配置とVSCode上のソース配置を対応付ける。そのとき最後のアスタリスクをどちらにもつける
+- chromeの開発者モードのSourceからwebpackの名前を確認する。
+- Next.jsの場合、webpackはwebpack://_N_E/
+- 上でwebrRootを適切に設定していれば、${webRoot}は${workspaceFolder}/my-appなどのエイリアスになってくれている。
+- 設定を反映するには一回デバック終了して再実行
+
+
+firebase emulatorを使う場合は、次をクローン。このリポジトリはcloud functionのリポジトリだが、firebase emulatorも一緒になっている。
+
+https://github.com/SolKul/function-storage
+
+次を参考に必要パッケージを整える。(ここら辺はよくわかっていない。)
+
+https://firebase.google.com/docs/emulator-suite
+
+
+
 
 
 # todo
@@ -35,10 +108,10 @@
 + [x] アップロードローディング
 + [x] cloud function 写真プレビュー用サムネイル→blueimp-load-imageを使って圧縮してアップロード
 + [x] アップロードローディングをバックグラウンドに
-+ [x] アップデート終了をポーリングではなく`onSnapshot`に
-+ [x] `onSnapshot`で写真更新
++ [x] ~~アップデート終了をポーリングではなく`onSnapshot`に~~
++ [x] ~~`onSnapshot`で写真更新~~
 + [x] 複数画像アップロード
-+ [ ] 写真プレビューページを複数ページに→
++ [x] 写真プレビューページを複数ページに→
 https://firebase.google.com/docs/firestore/query-data/query-cursors#paginate_a_query
 + [x] グループ紹介ページ
 + [ ] セットリスト
