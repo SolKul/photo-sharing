@@ -4,29 +4,24 @@ import Image from 'next/image'
 
 import styles from '../styles/Home.module.scss'
 
+import {ImageInfo} from "./GetImages"
 import {PreviewModal,idAndUrl} from "./PreviewModal"
 
-export type ImageInfo = {
-  id: string
-  thumbUrl: string
-  previewUrl:string
-  valid:boolean
-}
-
 type ImageListProps = {
-  imlist: ImageInfo[]
+  imgList: ImageInfo[]
 }
 
 // idのみ列挙するコンポーネント
-export const ImageIdList = ({ imlist }: ImageListProps) => {
-  // imlistプロパティの要素数が 0 であれば何も描画しない
-  if (imlist.length == 0) return null;
+export const ImageIdList = ({ imgList }: ImageListProps) => {
+  // imgListプロパティの要素数が 0 であれば何も描画しない
+  if (imgList.length == 0) return null;
 
-  // imlistからitemを取り出し、item.idとitem.urlを組み込んで
+  // imgListからitemを取り出し、item.idとitem.urlを組み込んで
   // li要素配列を生成する。
-  const listItems = imlist.map((item: ImageInfo) =>
+  const listItems = imgList.map((item: ImageInfo) =>
     <li key={item.id}>
       id: {item.id}
+      url: {item.previewUrl}
     </li>
   );
 
@@ -39,12 +34,12 @@ export const ImageIdList = ({ imlist }: ImageListProps) => {
 
 // ImageListコンポーネントはurlの配列を受け取って
 // li要素を生成し、instagram風に並べるコンポーネント
-export const ImageList = ({ imlist }: ImageListProps) => {
+export const ImageList = ({ imgList }: ImageListProps) => {
   const [show, setShow] = useState<boolean>(false)
   const [idAndUrl, setIdAndUrl] = useState<idAndUrl>({id:"",url:""})
 
-  // imlistプロパティの要素数が 0 であれば何も描画しない
-  if (imlist.length == 0) return null;
+  // imgListプロパティの要素数が 0 であれば何も描画しない
+  if (imgList.length == 0) return null;
 
   const openModal =(id:string,previewUrl:string)=>{
     setIdAndUrl({
@@ -54,9 +49,9 @@ export const ImageList = ({ imlist }: ImageListProps) => {
     setShow(true)
   }
 
-  // imlistからitemを取り出し、item.idとitem.urlを組み込んで
+  // imgListからitemを取り出し、item.idとitem.urlを組み込んで
   // 配列を生成する。
-  const listItems = imlist.map((item: ImageInfo) =>{
+  const listItems = imgList.map((item: ImageInfo) =>{
     if (item.valid){
       return <div key={item.id} className="col-4 col-lg-3">
         <div onClick={()=>openModal(item.id,item.previewUrl)}>

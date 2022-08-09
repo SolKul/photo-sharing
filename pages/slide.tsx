@@ -5,7 +5,7 @@ import {getAuth, onAuthStateChanged} from 'firebase/auth'
 import { useState,useEffect,useRef } from "react";
 
 import { useRouter } from "next/router";
-import { ImageInfo } from "../components/ImageList";
+import { ImageInfo } from "../components/GetImages";
 
 import Image from 'next/image'
 import { Swiper, SwiperSlide } from 'swiper/react' //カルーセル用のタグをインポート

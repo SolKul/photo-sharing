@@ -129,7 +129,6 @@ export default function Home(){
         <div></div>
         <div className="text-start col-11 col-md-6 ">{message}</div>
       </fieldset>
-      <div className="footer"><h6>※このWebサイトは4/9までご利用になれます</h6></div>
       </form>
     </div>
     </Layout>
