@@ -191,7 +191,7 @@ const UploadModal=({
           clearState()
           endUpload()
         },
-        3000
+        10000
       )
     })
   }
