@@ -5,7 +5,7 @@ import { useImages } from "../components/GetImages"
 import { useRouter } from "next/router";
 
 export default function Home(){
-  const {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}=useImages(10)
+  const {imgList,isLoading,isError,existPrevPage,existNextPage,authAndFetchImages,fetchImages}=useImages(10)
   const router=useRouter()
 
   useEffect(()=>{
@@ -32,12 +32,12 @@ export default function Home(){
       <div>
         <ImageIdList imgList={imgList} />
         {
-          existAdjacentPage.prev
+          existPrevPage
             &&
           <div onClick={fetchImages.bind(null,"prev")}>prev</div>
         }
         {
-          existAdjacentPage.next
+          existNextPage
             &&
           <div onClick={fetchImages.bind(null,"next")}>next</div>
         }
