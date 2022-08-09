@@ -9,7 +9,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   limit,
-  startAfter
+  startAfter,
 } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from 'firebase/storage'
 import {getAuth, onAuthStateChanged} from 'firebase/auth'
@@ -45,19 +45,10 @@ const initAdjacentPageSnapshot={
 
 export type TargetType= "first" | MoveDirection
 
-export type ExitAdjacentPage={
-  prev:boolean,
-  next:boolean
-}
-
-const falseExitAdjacentPage={
-  prev:false,
-  next:false
-}
-
 const usePagination=(numLimit:number)=>{
-  const [existAdjacentPage,setExistAdjacentPage] = useState<ExitAdjacentPage>(falseExitAdjacentPage)
   const [adjacentPageSnapshot,setAdjacentPageSnapshot]=useState<AdjacentPageSnapshot>(initAdjacentPageSnapshot)
+  const [existPrevPage,setExistPrevPage] = useState<boolean>(false)
+  const [existNextPage,setExistNextPage] = useState<boolean>(false)
 
   // collectionへの参照を取得
   const photoRef = collection(db, "photos");
@@ -67,6 +58,8 @@ const usePagination=(numLimit:number)=>{
    * @param target どのページを表示するか
    */
    const readPage=(target:TargetType)=>{
+    setExistPrevPage(false)
+    setExistNextPage(false)
     return target=="first" ? readFirst() : movePage(target)
   }
 
@@ -77,7 +70,6 @@ const usePagination=(numLimit:number)=>{
    * adjacentPageSnapshotに保存する
    */
    const readFirst=async ()=>{
-    setExistAdjacentPage(falseExitAdjacentPage)
     try{
       // 写真をアップロード日降順で取得(最新のが1番上に)
       const photoQuery = query(photoRef, orderBy("timeCreated","desc"),limit(numLimit));
@@ -103,7 +95,6 @@ const usePagination=(numLimit:number)=>{
    * @param moveDirection ページの移動方向
    */
    const movePage=async (moveDirection:MoveDirection)=>{
-    setExistAdjacentPage(falseExitAdjacentPage)
     try{
       // 次のページに移動する場合はadjacentPageSnapshot["next"]のsnapshotを取り出す。
       // 前のページに移動する場合はadjacentPageSnapshot["prev"]のsnapshotを取り出す。
@@ -163,30 +154,32 @@ const usePagination=(numLimit:number)=>{
       )
       getDocs(photoQuery).then((newSnapshot)=>{
         // 次のページに移動する場合はadjacentPageSnapshot["next"]のsnapshot、
-        // prevExitAdjacentPage["next"]がtrueかfalseか、
+        // existNextPageがtrueかfalseか、
         // 前のページに移動する場合はadjacentPageSnapshot["prev"]のsnapshot、
-        // prevExitAdjacentPage["prev"]がtrueかfalseかを更新する
+        // existPrevPageがtrueかfalseかを更新する
         setAdjacentPageSnapshot(
           (prevAdjacentPageSnapshot)=>{
             prevAdjacentPageSnapshot[moveDirection]=newSnapshot
             return { ... prevAdjacentPageSnapshot}
           }
         )
-        setExistAdjacentPage((prevExitAdjacentPage)=>{
-            prevExitAdjacentPage[moveDirection]=newSnapshot.docs.length>0
-            return { ... prevExitAdjacentPage }
-        })
+        setExistsAdjacentPage(moveDirection,newSnapshot.docs.length>0)
       })
     }catch(error){
       console.error(error)
-      setExistAdjacentPage((prevExitAdjacentPage)=>{
-        prevExitAdjacentPage[moveDirection]=false
-        return prevExitAdjacentPage
-      })
+      setExistsAdjacentPage(moveDirection,false)
     }
   }
 
-  return {existAdjacentPage,readPage}
+  const setExistsAdjacentPage = (moveDirection:MoveDirection,exist:boolean)=>{
+    if(moveDirection=="next"){
+      setExistNextPage(exist)
+    }else{
+      setExistPrevPage(exist)
+    }
+  }
+
+  return {existPrevPage,existNextPage,setAdjacentPageSnapshot,readPage}
 }
 
 
@@ -194,7 +187,7 @@ export const useImages=(numLimit:number)=>{
   const [imgList, setImglist] = useState<ImageInfo[]>([])
   const [isLoading,setIsLoading]=useState<boolean>(true)
   const [isError,setIsError]=useState<boolean>(false)
-  const {existAdjacentPage,readPage}=usePagination(numLimit)
+  const {existPrevPage,existNextPage,setAdjacentPageSnapshot,readPage}=usePagination(numLimit)
 
   /**
    * onAuthStateChangedに画像をロードする関数を与える
@@ -299,5 +292,5 @@ export const useImages=(numLimit:number)=>{
     return true
   }
 
-  return {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}
+  return {imgList,isLoading,isError,existPrevPage,existNextPage,authAndFetchImages,fetchImages}
 }

@@ -6,12 +6,14 @@ import loadImage,{LoadImageOptions }from 'blueimp-load-image';
 import firebaseApp from "./fire"
 import styles from '../styles/Home.module.scss'
 
+import { TargetType } from "../components/GetImages"
+
 const storage = getStorage(firebaseApp)
 
 const c = "abcdefghijklmnopqrstuvwxyz0123456789";
 const cl = c.length;
 
-export default function UploadLayer(){
+export default function UploadLayer({fetchImages}:{fetchImages:(target:TargetType)=>void}){
   const [modalAppear, setModalAppear] = useState<boolean>(false)
   const [btnAppear, setBtnAppear] = useState<boolean>(true)
   const [uploading, setUploading] = useState<boolean>(false);
@@ -34,6 +36,7 @@ export default function UploadLayer(){
   const endUpload=()=>{
     setUploading(false)
     setBtnAppear(true)
+    fetchImages("first")
   }
 
   return <div>
@@ -106,7 +109,7 @@ const UploadModal=({
   const convertFiletoBlob=(files:FileList)=>{
     const tmpBImgArray:blobedImageObject[]=[]
     const imgLoadTasks:Promise<void>[]=[]    
-    const length=Math.min(files.length,16)
+    const length=Math.min(files.length,9)
     for (let i=0;i<length;i++){
       const options:LoadImageOptions={
         maxWidth: 1200,
@@ -183,8 +186,13 @@ const UploadModal=({
       } //end else
     }) //end forEach
     Promise.all(uploadTasks).then(()=>{
-      clearState()
-      endUpload()
+      setTimeout(
+        ()=>{
+          clearState()
+          endUpload()
+        },
+        3000
+      )
     })
   }
 
@@ -295,9 +303,9 @@ const ImageSection=({imgStatus,bImgArray}:ImageSectionProps)=>{
   if(imgStatus == 0){
     return <div>
       ※圧縮してアップロードするので容量制限を気にせずアップロードできます！
-      (1,000枚で0.1GB)
+      (1,000枚で0.4GB)
       <br />
-      ※16枚まで同時にアップロードできます
+      ※9枚まで同時にアップロードできます
     </div>
   }else if(imgStatus==1){
     return <div className={`d-flex justify-content-center align-items-center ${styles.full}`}>

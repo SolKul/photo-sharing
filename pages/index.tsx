@@ -3,12 +3,12 @@ import { useState,useEffect } from "react";
 import Layout from '../components/Layout'
 import UploadLayer from "../components/UploadLayer";
 import { ImageList} from "../components/ImageList";
-import { useImages,TargetType,ExitAdjacentPage } from "../components/GetImages"
+import { useImages,TargetType } from "../components/GetImages"
 import { useRouter } from "next/router";
 
 export default function Home(){
   const router=useRouter()
-  const {imgList,isLoading,isError,existAdjacentPage,authAndFetchImages,fetchImages}=useImages(30)
+  const {imgList,isLoading,isError,existPrevPage,existNextPage,authAndFetchImages,fetchImages}=useImages(30)
 
   useEffect(()=>{
     authAndFetchImages()
@@ -36,8 +36,8 @@ export default function Home(){
               :
             <div>
             <ImageList imgList={imgList}/>
-            <UploadLayer/>
-            <NextPrev existAdjacentPage={existAdjacentPage} fetchImages={fetchImages} />
+            <UploadLayer fetchImages={fetchImages}/>
+            <NextPrev existPrevPage={existPrevPage} existNextPage={existNextPage} fetchImages={fetchImages} />
             </div>
           }
         </div>
@@ -48,7 +48,7 @@ export default function Home(){
 }
 
 const NextPrev=(
-  {existAdjacentPage,fetchImages}:{existAdjacentPage:ExitAdjacentPage,fetchImages:(target:TargetType)=>void})=>{
+  {existPrevPage,existNextPage,fetchImages}:{existPrevPage:boolean,existNextPage:boolean,fetchImages:(target:TargetType)=>void})=>{
   return <div className="row">
     <style jsx>{`
       .font{
@@ -56,9 +56,10 @@ const NextPrev=(
         font-weight: 700;
       }
     `}</style>
-    <div className="col-5">
+    <div className="col-2"><p className="text-end font h3" onClick={fetchImages.bind(null,"first")}>&lt;&lt;</p></div>
+    <div className="col-3">
       {
-        existAdjacentPage.prev
+        existPrevPage
           &&
         <p className="text-end font h3" onClick={fetchImages.bind(null,"prev")}>&lt;prev</p>
       }
@@ -66,7 +67,7 @@ const NextPrev=(
     <div className="col-1"></div>
     <div className="col-5">
       {
-        existAdjacentPage.next
+        existNextPage
           &&
         <p className="text-start font h3" onClick={fetchImages.bind(null,"next")}>next&gt;</p>
       }
